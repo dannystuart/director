@@ -19,8 +19,7 @@ function parseBody(req: IncomingMessage): Promise<unknown> {
 }
 
 function json(res: ServerResponse, data: unknown, status = 200): void {
-  res.writeHead(status)
-  res.setHeader('content-type', 'application/json')
+  res.writeHead(status, { 'content-type': 'application/json' })
   res.end(JSON.stringify(data))
 }
 
@@ -71,8 +70,7 @@ export function createAnnotationMiddleware(storage: Storage) {
       if (route.startsWith('/images/') && method === 'GET') {
         const filename = route.slice('/images/'.length)
         const buffer = await storage.getImage(filename)
-        res.writeHead(200)
-        res.setHeader('content-type', 'image/png')
+        res.writeHead(200, { 'content-type': 'image/png' })
         res.end(buffer)
         return
       }
