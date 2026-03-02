@@ -3,3 +3,5 @@ dist/
 .ui-annotations/
 .DS_Store
 *.tsbuildinfo
+demo/node_modules/
+demo/pnpm-lock.yaml
