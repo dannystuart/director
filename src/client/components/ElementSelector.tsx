@@ -2,9 +2,11 @@ import { useContext, useEffect, useRef, useCallback } from 'preact/hooks'
 import { AppContext } from '../context'
 import { generateSelector, generateXPath } from '../utils/selector'
 import { captureComputedStyles } from '../utils/styles'
+import { useScreenshot } from '../hooks/useScreenshot'
 
 export function ElementSelector() {
   const { state, dispatch } = useContext(AppContext)
+  const { capture } = useScreenshot()
   const highlightRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
 
@@ -47,12 +49,15 @@ export function ElementSelector() {
       }
     }
 
-    const onClick = (e: MouseEvent) => {
+    const onClick = async (e: MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
 
       const target = e.target as Element
       if (!target || isAnnotatorElement(target)) return
+
+      // Capture screenshot before creating annotation
+      const screenshot = await capture(target)
 
       const rect = target.getBoundingClientRect()
       const textContent = (target.textContent ?? '').trim().slice(0, 100)
@@ -82,7 +87,7 @@ export function ElementSelector() {
         comment: '',
         quickActions: [],
         quickActionIntents: [],
-        screenshot: null,
+        screenshot,
         referenceImage: null,
       }
 
@@ -98,7 +103,7 @@ export function ElementSelector() {
       document.removeEventListener('mousemove', onMouseMove, { capture: true })
       document.removeEventListener('click', onClick, { capture: true })
     }
-  }, [state.mode, state.annotations.length, dispatch, isAnnotatorElement])
+  }, [state.mode, state.annotations.length, dispatch, isAnnotatorElement, capture])
 
   return (
     <>
