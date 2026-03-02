@@ -52,7 +52,7 @@ export function annotateUI(options: PluginOptions = {}): Plugin {
 
     transformIndexHtml() {
       const distDir = getDistDir()
-      const clientPath = path.resolve(distDir, 'client.iife.js')
+      const clientPath = path.resolve(distDir, 'client.global.js')
 
       let clientCode = ''
       try {
