@@ -267,6 +267,7 @@ export function AnnotationCard() {
       {editingText && resolvedEl && (
         <TextEditor
           element={resolvedEl}
+          iframe={iframe}
           domState={domState}
           onSave={(original, updated) => {
             setEditingText(false)
