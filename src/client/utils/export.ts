@@ -29,6 +29,18 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
     if (ann.element.textContent) {
       lines.push(`**Current text:** "${ann.element.textContent}"`)
     }
+
+    // Viewport (only for non-desktop)
+    if (ann.viewportWidth && ann.viewportWidth < 1024) {
+      const label = ann.viewportWidth <= 480 ? 'Mobile' : 'Tablet'
+      lines.push(`**Viewport:** ${ann.viewportWidth}px (${label})`)
+    }
+
+    // Text change
+    if (ann.textChange) {
+      lines.push(`**Text change:** "${ann.textChange.original}" \u2192 "${ann.textChange.updated}"`)
+    }
+
     lines.push('')
 
     const changes = Object.entries(ann.targetStyles).filter(
@@ -50,6 +62,15 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
       }
     }
 
+    // Color change
+    if (ann.colorChange) {
+      const prop = camelToKebab(ann.colorChange.property)
+      const to = ann.colorChange.tokenName
+        ? `var(${ann.colorChange.tokenName}) (${ann.colorChange.to})`
+        : ann.colorChange.to
+      lines.push(`- ${prop}: ${ann.colorChange.from} \u2192 ${to}`)
+    }
+
     lines.push('')
 
     if (ann.quickActions.length > 0) {
@@ -60,6 +81,18 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
     }
     if (ann.comment) {
       lines.push(`**Comment:** "${ann.comment}"`)
+    }
+
+    // Insertion
+    if (ann.insertion) {
+      const posLabel = ann.insertion.position.charAt(0).toUpperCase() + ann.insertion.position.slice(1)
+      const typeLabel = ann.insertion.elementType.charAt(0).toUpperCase() + ann.insertion.elementType.slice(1)
+      lines.push(`**Change type:** Insert new element`)
+      lines.push(`**Position:** ${posLabel} \`${ann.element.selector}\``)
+      lines.push(`**Insert:** ${typeLabel} \u2014 "${ann.insertion.textContent}"`)
+      if (ann.insertion.description) {
+        lines.push(`**Notes:** "${ann.insertion.description}"`)
+      }
     }
 
     if (ann.screenshot) {

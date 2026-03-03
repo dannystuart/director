@@ -54,4 +54,69 @@ describe('buildExportMarkdown', () => {
     const md = buildExportMarkdown([makeAnnotation()])
     expect(md).not.toContain('Screenshot:')
   })
+
+  it('includes viewport width for mobile', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 375 })])
+    expect(md).toContain('**Viewport:** 375px (Mobile)')
+  })
+
+  it('labels viewport as Tablet for 768px', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 768 })])
+    expect(md).toContain('**Viewport:** 768px (Tablet)')
+  })
+
+  it('omits viewport for desktop widths >= 1024', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 1440 })])
+    expect(md).not.toContain('**Viewport:**')
+  })
+
+  it('includes text change when present', () => {
+    const ann = makeAnnotation({
+      textChange: { original: 'Dashboard Overview', updated: 'My Dashboard' },
+    })
+    const md = buildExportMarkdown([ann])
+    expect(md).toContain('**Text change:** "Dashboard Overview" → "My Dashboard"')
+  })
+
+  it('includes color change with token name', () => {
+    const ann = makeAnnotation({
+      colorChange: {
+        property: 'backgroundColor',
+        from: 'rgb(0, 0, 0)',
+        to: '#2563eb',
+        tokenName: '--color-primary',
+      },
+    })
+    const md = buildExportMarkdown([ann])
+    expect(md).toContain('background-color: rgb(0, 0, 0) → var(--color-primary) (#2563eb)')
+  })
+
+  it('includes color change without token name', () => {
+    const ann = makeAnnotation({
+      colorChange: {
+        property: 'color',
+        from: 'rgb(0, 0, 0)',
+        to: '#ff0000',
+        tokenName: null,
+      },
+    })
+    const md = buildExportMarkdown([ann])
+    expect(md).toContain('color: rgb(0, 0, 0) → #ff0000')
+  })
+
+  it('formats insertion annotation', () => {
+    const ann = makeAnnotation({
+      insertion: {
+        position: 'after',
+        elementType: 'button',
+        textContent: 'Get Started Free',
+        description: 'Primary CTA, match existing button styles',
+      },
+    })
+    const md = buildExportMarkdown([ann])
+    expect(md).toContain('**Change type:** Insert new element')
+    expect(md).toContain('**Position:** After')
+    expect(md).toContain('**Insert:** Button — "Get Started Free"')
+    expect(md).toContain('**Notes:** "Primary CTA, match existing button styles"')
+  })
 })
