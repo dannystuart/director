@@ -512,6 +512,54 @@
   color: #00ff41;
 }
 
+/* --- Side Panel --- */
+
+.va-side-panel {
+  position: fixed;
+  z-index: 2147483645;
+  width: 280px;
+  max-height: 500px;
+  background: #0a0a0a;
+  border: 1px solid #00ff41;
+  border-radius: 4px;
+  font-family: 'Berkeley Mono', 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  color: #e0e0e0;
+  overflow-y: auto;
+}
+
+.va-side-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #333;
+}
+
+.va-side-panel-title {
+  color: #00ff41;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.va-side-panel-close {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+
+.va-side-panel-close:hover {
+  color: #ff4444;
+}
+
+.va-side-panel-body {
+  padding: 12px;
+}
+
 .va-card::-webkit-scrollbar {
   width: 6px;
 }

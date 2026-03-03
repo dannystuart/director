@@ -9,6 +9,10 @@ export interface AppState {
   activeAnnotation: string | null
   visionMode: boolean
   hoveredElement: HTMLElement | null
+  sidePanel: {
+    type: 'color' | 'font' | 'spacing' | 'insertion'
+    element: HTMLElement | null
+  } | null
 }
 
 export type AppAction =
@@ -21,11 +25,13 @@ export type AppAction =
   | { type: 'UPDATE_ANNOTATION'; annotation: Annotation }
   | { type: 'REMOVE_ANNOTATION'; id: string }
   | { type: 'MARK_PROCESSED'; ids: string[] }
+  | { type: 'OPEN_SIDE_PANEL'; panel: 'color' | 'font' | 'spacing' | 'insertion'; element: HTMLElement }
+  | { type: 'CLOSE_SIDE_PANEL' }
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_MODE':
-      return { ...state, mode: action.mode, hoveredElement: null }
+      return { ...state, mode: action.mode, hoveredElement: null, sidePanel: null }
     case 'SET_ANNOTATIONS':
       return { ...state, annotations: action.annotations }
     case 'SET_ACTIVE':
@@ -56,6 +62,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           action.ids.includes(a.id) ? { ...a, processed: true } : a
         ),
       }
+    case 'OPEN_SIDE_PANEL':
+      return { ...state, sidePanel: { type: action.panel, element: action.element } }
+    case 'CLOSE_SIDE_PANEL':
+      return { ...state, sidePanel: null }
     default:
       return state
   }
@@ -67,6 +77,7 @@ export const initialState: AppState = {
   activeAnnotation: null,
   visionMode: true,
   hoveredElement: null,
+  sidePanel: null,
 }
 
 export const AppContext = createContext<{
