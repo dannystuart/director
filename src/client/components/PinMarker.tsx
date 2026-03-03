@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'preact/hooks'
 import { AppContext } from '../context'
+import { resolveElement, resolveRect } from '../utils/resolveElement'
 import type { Annotation } from '../../shared/types'
 
 const PIN_SIZE = 22
@@ -11,26 +12,31 @@ interface PinMarkerProps {
 }
 
 export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
-  const { dispatch } = useContext(AppContext)
+  const { state, dispatch } = useContext(AppContext)
+  const iframe = state.viewport.iframe
   const [pos, setPos] = useState({ x: annotation.element.boundingBox.x, y: annotation.element.boundingBox.y })
   const observerRef = useRef<MutationObserver | null>(null)
   const resizeRef = useRef<ResizeObserver | null>(null)
 
   useEffect(() => {
     const updatePos = () => {
-      const el = document.querySelector(annotation.element.selector)
+      const el = resolveElement(annotation.element.selector, iframe)
       if (el) {
-        const rect = el.getBoundingClientRect()
+        const rect = resolveRect(el, iframe)
         setPos({ x: rect.left + window.scrollX, y: rect.top + window.scrollY })
       }
     }
 
     updatePos()
 
+    // Observe mutations in the correct document
+    const observeTarget = iframe
+      ? iframe.contentDocument?.body ?? document.body
+      : document.body
     observerRef.current = new MutationObserver(updatePos)
-    observerRef.current.observe(document.body, { childList: true, subtree: true, attributes: true })
+    observerRef.current.observe(observeTarget, { childList: true, subtree: true, attributes: true })
 
-    const el = document.querySelector(annotation.element.selector)
+    const el = resolveElement(annotation.element.selector, iframe)
     if (el) {
       resizeRef.current = new ResizeObserver(updatePos)
       resizeRef.current.observe(el)
@@ -40,7 +46,7 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
       observerRef.current?.disconnect()
       resizeRef.current?.disconnect()
     }
-  }, [annotation.element.selector])
+  }, [annotation.element.selector, iframe])
 
   const handleClick = () => {
     dispatch({ type: 'SET_ACTIVE', id: annotation.id })
