@@ -4,6 +4,7 @@ import { StylesDiff } from './StylesDiff'
 import { TextEditor } from './TextEditor'
 import { ColorPickerPanel } from './ColorPickerPanel'
 import { InsertionPanel } from './InsertionPanel'
+import { StyleSlidersPanel } from './StyleSlidersPanel'
 import { useDOMState } from '../hooks/useDOMState'
 import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
 import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles, InsertionPosition } from '../../shared/types'
@@ -86,6 +87,7 @@ export function AnnotationCard() {
   const [colorChange, setColorChange] = useState<Annotation['colorChange'] | null>(null)
   const [insertionPosition, setInsertionPosition] = useState<InsertionPosition | null>(null)
   const [insertion, setInsertion] = useState<Annotation['insertion'] | null>(null)
+  const [styleChanges, setStyleChanges] = useState<Record<string, string>>({})
   const domState = useDOMState()
 
   useEffect(() => {
@@ -303,6 +305,27 @@ export function AnnotationCard() {
         />
       )}
 
+      {(state.sidePanel?.type === 'font' || state.sidePanel?.type === 'spacing') && state.sidePanel.element && (
+        <StyleSlidersPanel
+          type={state.sidePanel.type}
+          element={state.sidePanel.element}
+          domState={domState}
+          onApply={(changes) => {
+            setStyleChanges((prev) => ({ ...prev, ...changes }))
+            // Apply slider changes to targetStyles for export
+            for (const [prop, val] of Object.entries(changes)) {
+              const key = cssPropertyToStyleKey(prop)
+              if (key) handleTargetStyleChange(key, val)
+            }
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+          onClose={() => {
+            if (state.sidePanel?.element) domState.revert(state.sidePanel.element)
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+        />
+      )}
+
       {/* Comment box — primary input */}
       <div class="va-comment-area">
         <textarea
@@ -486,6 +509,29 @@ function computeCardPosition(box: { x: number; y: number; width: number; height:
   }
   // Above
   return { left: `${Math.max(margin, box.x)}px`, bottom: `${vh - box.y + gap}px` }
+}
+
+/** Map CSS property names (kebab-case) to ComputedStyles keys (camelCase) */
+function cssPropertyToStyleKey(prop: string): keyof ComputedStyles | null {
+  const map: Record<string, keyof ComputedStyles> = {
+    'font-size': 'fontSize',
+    'font-weight': 'fontWeight',
+    'font-family': 'fontFamily',
+    'line-height': 'lineHeight',
+    'letter-spacing': 'letterSpacing',
+    'padding': 'padding',
+    'padding-top': 'padding',
+    'padding-right': 'padding',
+    'padding-bottom': 'padding',
+    'padding-left': 'padding',
+    'margin': 'margin',
+    'margin-top': 'margin',
+    'margin-right': 'margin',
+    'margin-bottom': 'margin',
+    'margin-left': 'margin',
+    'gap': 'gap',
+  }
+  return map[prop] ?? null
 }
 
 function fileToBase64(file: File): Promise<string> {
