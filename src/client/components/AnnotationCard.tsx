@@ -6,6 +6,7 @@ import { ColorPickerPanel } from './ColorPickerPanel'
 import { InsertionPanel } from './InsertionPanel'
 import { StyleSlidersPanel } from './StyleSlidersPanel'
 import { useDOMState } from '../hooks/useDOMState'
+import { resolveElement, resolveRect } from '../utils/resolveElement'
 import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
 import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles, InsertionPosition } from '../../shared/types'
 
@@ -70,6 +71,7 @@ const CATEGORIES: { key: QuickAction; label: string }[] = [
 export function AnnotationCard() {
   const { state, dispatch } = useContext(AppContext)
   const annotation = state.annotations.find((a) => a.id === state.activeAnnotation)
+  const iframe = state.viewport.iframe
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -213,7 +215,11 @@ export function AnnotationCard() {
 
   if (!annotation) return null
 
-  const cardStyle = computeCardPosition(annotation.element.boundingBox)
+  const resolvedEl = resolveElement(annotation.element.selector, iframe)
+  const liveBox = resolvedEl
+    ? resolveRect(resolvedEl, iframe)
+    : annotation.element.boundingBox
+  const cardStyle = computeCardPosition(liveBox)
 
   return (
     <div class="va-card" style={cardStyle}>
@@ -222,9 +228,9 @@ export function AnnotationCard() {
         <button class="va-card-close" onClick={handleCancel}>{'\u2715'}</button>
       </div>
 
-      {/* Interactive actions — edit text + insert */}
+      {/* Interactive actions — edit text (leaf nodes only) + insert */}
       <div class="va-interactive-actions">
-        {annotation.element.textContent && (
+        {annotation.element.textContent && resolvedEl && resolvedEl.children.length === 0 && (
           <button
             class={`va-quick-action ${editingText ? 'va-quick-action--active' : ''}`}
             onClick={() => setEditingText(true)}
@@ -248,7 +254,7 @@ export function AnnotationCard() {
               class={`va-quick-action ${insertionPosition === pos ? 'va-quick-action--active' : ''}`}
               onClick={() => {
                 setInsertionPosition(pos)
-                const el = document.querySelector(annotation.element.selector) as HTMLElement
+                const el = resolveElement(annotation.element.selector, iframe) as HTMLElement
                 if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'insertion', element: el })
               }}
             >
@@ -258,21 +264,17 @@ export function AnnotationCard() {
         </div>
       )}
 
-      {editingText && (() => {
-        const el = document.querySelector(annotation.element.selector) as HTMLElement
-        if (!el) return null
-        return (
-          <TextEditor
-            element={el}
-            domState={domState}
-            onSave={(original, updated) => {
-              setEditingText(false)
-              setTextChange({ original, updated })
-            }}
-            onCancel={() => setEditingText(false)}
-          />
-        )
-      })()}
+      {editingText && resolvedEl && (
+        <TextEditor
+          element={resolvedEl}
+          domState={domState}
+          onSave={(original, updated) => {
+            setEditingText(false)
+            setTextChange({ original, updated })
+          }}
+          onCancel={() => setEditingText(false)}
+        />
+      )}
 
       {state.sidePanel?.type === 'color' && state.sidePanel.element && (
         <ColorPickerPanel
@@ -413,7 +415,7 @@ export function AnnotationCard() {
           <button
             class="va-quick-action-drill"
             onClick={() => {
-              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              const el = resolveElement(annotation.element.selector, iframe) as HTMLElement
               if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'color', element: el })
             }}
           >
@@ -424,7 +426,7 @@ export function AnnotationCard() {
           <button
             class="va-quick-action-drill"
             onClick={() => {
-              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              const el = resolveElement(annotation.element.selector, iframe) as HTMLElement
               if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'font', element: el })
             }}
           >
@@ -435,7 +437,7 @@ export function AnnotationCard() {
           <button
             class="va-quick-action-drill"
             onClick={() => {
-              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              const el = resolveElement(annotation.element.selector, iframe) as HTMLElement
               if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'spacing', element: el })
             }}
           >
@@ -473,7 +475,7 @@ export function AnnotationCard() {
           <button class="va-btn" onClick={handleCancel}>CANCEL</button>
           <button
             class="va-btn va-btn--primary"
-            disabled={selectedActions.size === 0 && !comment.trim()}
+            disabled={selectedActions.size === 0 && !comment.trim() && !textChange && !colorChange && !insertion && Object.keys(styleChanges).length === 0}
             onClick={handleSave}
           >
             SAVE
