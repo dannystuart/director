@@ -5,3 +5,4 @@ dist/
 *.tsbuildinfo
 demo/node_modules/
 demo/pnpm-lock.yaml
+.worktrees/
