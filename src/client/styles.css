@@ -610,6 +610,161 @@
   border-top: 1px solid #1a1a1a;
 }
 
+/* --- Quick Action Drill-Down --- */
+
+.va-quick-action-drill {
+  display: block;
+  width: 100%;
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  border-top: 1px solid #1a1a1a;
+  color: #00ff41;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.va-quick-action-drill:hover {
+  background: #111;
+}
+
+/* --- Color Picker --- */
+
+.va-color-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.va-color-tab {
+  flex: 1;
+  padding: 4px 8px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #888;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.va-color-tab--active {
+  border-color: #00ff41;
+  color: #00ff41;
+}
+
+.va-color-section {
+  margin-bottom: 12px;
+}
+
+.va-color-section-label {
+  font-size: 9px;
+  color: #00ff41;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.va-color-token-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid transparent;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.va-color-token-row:hover {
+  border-color: #00ff41;
+  background: #111;
+}
+
+.va-color-token-name {
+  flex: 1;
+  color: #ccc;
+}
+
+.va-color-token-value {
+  color: #888;
+  font-size: 10px;
+}
+
+.va-color-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #555;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.va-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.va-color-swatch--btn {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.va-color-swatch--btn:hover {
+  border-color: #00ff41;
+  transform: scale(1.2);
+}
+
+.va-color-hex-input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #111;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.va-color-hex-input:focus {
+  border-color: #00ff41;
+  outline: none;
+}
+
+.va-btn--apply {
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background: #00ff41;
+  color: #0a0a0a;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.va-btn--apply:hover {
+  background: #00cc33;
+}
+
+.va-btn--apply:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .va-card::-webkit-scrollbar {
   width: 6px;
 }

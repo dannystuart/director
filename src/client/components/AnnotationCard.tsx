@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from 'preact/hooks'
 import { AppContext } from '../context'
 import { StylesDiff } from './StylesDiff'
 import { TextEditor } from './TextEditor'
+import { ColorPickerPanel } from './ColorPickerPanel'
 import { useDOMState } from '../hooks/useDOMState'
 import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
 import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles } from '../../shared/types'
@@ -81,6 +82,7 @@ export function AnnotationCard() {
   const [referencePreview, setReferencePreview] = useState<string | null>(null)
   const [editingText, setEditingText] = useState(false)
   const [textChange, setTextChange] = useState<{ original: string; updated: string } | null>(null)
+  const [colorChange, setColorChange] = useState<Annotation['colorChange'] | null>(null)
   const domState = useDOMState()
 
   useEffect(() => {
@@ -178,6 +180,7 @@ export function AnnotationCard() {
       targetStyles,
       referenceImage,
       ...(textChange && { textChange }),
+      ...(colorChange && { colorChange }),
     }
 
     await saveAnnotation(updated)
@@ -240,6 +243,21 @@ export function AnnotationCard() {
           />
         )
       })()}
+
+      {state.sidePanel?.type === 'color' && state.sidePanel.element && (
+        <ColorPickerPanel
+          element={state.sidePanel.element}
+          domState={domState}
+          onApply={(change) => {
+            setColorChange(change)
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+          onClose={() => {
+            if (state.sidePanel?.element) domState.revert(state.sidePanel.element)
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+        />
+      )}
 
       {/* Comment box — primary input */}
       <div class="va-comment-area">
@@ -323,6 +341,39 @@ export function AnnotationCard() {
               </button>
             ))}
           </div>
+        )}
+        {selectedActions.has('color') && (
+          <button
+            class="va-quick-action-drill"
+            onClick={() => {
+              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'color', element: el })
+            }}
+          >
+            Pick color...
+          </button>
+        )}
+        {selectedActions.has('font') && (
+          <button
+            class="va-quick-action-drill"
+            onClick={() => {
+              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'font', element: el })
+            }}
+          >
+            Adjust font...
+          </button>
+        )}
+        {selectedActions.has('spacing') && (
+          <button
+            class="va-quick-action-drill"
+            onClick={() => {
+              const el = document.querySelector(annotation.element.selector) as HTMLElement
+              if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'spacing', element: el })
+            }}
+          >
+            Adjust spacing...
+          </button>
         )}
       </div>
 
