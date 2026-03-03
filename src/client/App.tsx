@@ -5,6 +5,7 @@ import { ElementSelector } from './components/ElementSelector'
 import { AnnotationCard } from './components/AnnotationCard'
 import { PinMarker } from './components/PinMarker'
 import { ControlPanel } from './components/ControlPanel'
+import { ReviewCard } from './components/ReviewCard'
 import { fetchAnnotations } from './utils/api'
 
 export function App() {
@@ -21,10 +22,16 @@ export function App() {
     <AppContext.Provider value={{ state, dispatch }}>
       <FloatingIcon />
       {state.mode === 'selecting' && <ElementSelector />}
-      {state.mode === 'selecting' && <ControlPanel />}
+      {(state.mode === 'selecting' || state.mode === 'reviewing') && <ControlPanel />}
       {state.mode === 'annotating' && state.activeAnnotation && <AnnotationCard />}
+      {state.mode === 'reviewing' && state.activeAnnotation && <ReviewCard />}
       {state.mode !== 'inactive' &&
-        state.annotations.map((ann) => <PinMarker key={ann.id} annotation={ann} />)}
+        state.annotations.map((ann) => {
+          const siblingIndex = state.annotations
+            .filter((a) => a.element.selector === ann.element.selector)
+            .findIndex((a) => a.id === ann.id)
+          return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
+        })}
     </AppContext.Provider>
   )
 }

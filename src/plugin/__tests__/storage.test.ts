@@ -45,8 +45,7 @@ describe('Storage', () => {
       computedStyles: { fontSize: '16px' },
       targetStyles: { fontSize: '24px' },
       comment: 'Make bigger',
-      quickActions: ['font' as const],
-      quickActionIntents: ['wrong font size'],
+      quickActions: [{ category: 'font' as const, detail: 'too-small' as const, intent: 'User flagged font is too small' }],
       screenshot: null,
       referenceImage: null,
     }
@@ -63,7 +62,7 @@ describe('Storage', () => {
       priority: 'high' as const,
       element: { selector: 'h1', xpath: '/h1', tag: 'h1', textContent: 'Hi', boundingBox: { x: 0, y: 0, width: 100, height: 40 } },
       computedStyles: {}, targetStyles: {}, comment: 'v1',
-      quickActions: [], quickActionIntents: [], screenshot: null, referenceImage: null,
+      quickActions: [], screenshot: null, referenceImage: null,
     }
     await storage.saveAnnotation(ann)
     await storage.saveAnnotation({ ...ann, comment: 'v2' })
@@ -79,7 +78,7 @@ describe('Storage', () => {
       priority: 'medium' as const,
       element: { selector: 'p', xpath: '/p', tag: 'p', textContent: '', boundingBox: { x: 0, y: 0, width: 0, height: 0 } },
       computedStyles: {}, targetStyles: {}, comment: '',
-      quickActions: [], quickActionIntents: [], screenshot: null, referenceImage: null,
+      quickActions: [], screenshot: null, referenceImage: null,
     }
     await storage.saveAnnotation(ann)
     await storage.deleteAnnotation('ann_1')

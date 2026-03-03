@@ -50,11 +50,11 @@ export function ElementSelector() {
     }
 
     const onClick = async (e: MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
       const target = e.target as Element
       if (!target || isAnnotatorElement(target)) return
+
+      e.preventDefault()
+      e.stopPropagation()
 
       // Capture screenshot before creating annotation
       const screenshot = await capture(target)
@@ -86,7 +86,6 @@ export function ElementSelector() {
         targetStyles: {},
         comment: '',
         quickActions: [],
-        quickActionIntents: [],
         screenshot,
         referenceImage: null,
       }

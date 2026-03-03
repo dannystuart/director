@@ -7,7 +7,7 @@ function camelToKebab(s: string): string {
 }
 
 export function buildExportMarkdown(annotations: Annotation[]): string {
-  const sorted = [...annotations].sort(
+  const sorted = [...annotations].filter((a) => !a.processed).sort(
     (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
   )
 
@@ -52,8 +52,11 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
 
     lines.push('')
 
-    if (ann.quickActionIntents.length > 0) {
-      lines.push(`**Intent:** ${ann.quickActionIntents.join(', ')}`)
+    if (ann.quickActions.length > 0) {
+      const intents = ann.quickActions.map((qa) => qa.intent).filter(Boolean)
+      if (intents.length > 0) {
+        lines.push(`**Intent:** ${intents.join(', ')}`)
+      }
     }
     if (ann.comment) {
       lines.push(`**Comment:** "${ann.comment}"`)

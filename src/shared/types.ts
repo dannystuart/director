@@ -32,7 +32,20 @@ export interface ComputedStyles {
 
 export type Priority = 'high' | 'medium' | 'low'
 
-export type QuickAction = 'color' | 'spacing' | 'font' | 'align' | 'reference' | 'comment'
+export type QuickAction = 'color' | 'spacing' | 'font' | 'align'
+
+export type QuickActionDetail =
+  | 'too-dark' | 'too-light' | 'wrong-color'
+  | 'too-much' | 'too-little'
+  | 'too-small' | 'too-large' | 'wrong-weight' | 'wrong-family'
+  | 'move-left' | 'move-right' | 'center-it'
+  | 'match-design'
+
+export interface QuickActionEntry {
+  category: QuickAction
+  detail: QuickActionDetail
+  intent: string
+}
 
 export interface ElementData {
   selector: string
@@ -51,10 +64,10 @@ export interface Annotation {
   computedStyles: ComputedStyles
   targetStyles: Partial<ComputedStyles>
   comment: string
-  quickActions: QuickAction[]
-  quickActionIntents: string[]
+  quickActions: QuickActionEntry[]
   screenshot: string | null
   referenceImage: string | null
+  processed?: boolean
 }
 
 export interface PageInfo {

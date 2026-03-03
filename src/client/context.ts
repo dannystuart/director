@@ -1,7 +1,7 @@
 import { createContext } from 'preact'
 import type { Annotation } from '../shared/types'
 
-export type Mode = 'inactive' | 'selecting' | 'annotating'
+export type Mode = 'inactive' | 'selecting' | 'annotating' | 'reviewing'
 
 export interface AppState {
   mode: Mode
@@ -20,6 +20,7 @@ export type AppAction =
   | { type: 'ADD_ANNOTATION'; annotation: Annotation }
   | { type: 'UPDATE_ANNOTATION'; annotation: Annotation }
   | { type: 'REMOVE_ANNOTATION'; id: string }
+  | { type: 'MARK_PROCESSED'; ids: string[] }
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -47,6 +48,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         annotations: state.annotations.filter((a) => a.id !== action.id),
         activeAnnotation: state.activeAnnotation === action.id ? null : state.activeAnnotation,
+      }
+    case 'MARK_PROCESSED':
+      return {
+        ...state,
+        annotations: state.annotations.map((a) =>
+          action.ids.includes(a.id) ? { ...a, processed: true } : a
+        ),
       }
     default:
       return state

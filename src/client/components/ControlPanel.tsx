@@ -1,17 +1,44 @@
 import { useContext, useState } from 'preact/hooks'
 import { AppContext } from '../context'
 import { buildExportMarkdown } from '../utils/export'
+import { saveAnnotation, deleteAnnotation } from '../utils/api'
 
 export function ControlPanel() {
   const { state, dispatch } = useContext(AppContext)
   const [copied, setCopied] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
+
+  const unprocessed = state.annotations.filter((a) => !a.processed)
 
   const handleCopy = async () => {
-    if (state.annotations.length === 0) return
+    if (unprocessed.length === 0) return
     const md = buildExportMarkdown(state.annotations)
     await navigator.clipboard.writeText(md)
+
+    const ids = unprocessed.map((a) => a.id)
+    dispatch({ type: 'MARK_PROCESSED', ids })
+
+    // Persist each newly-processed annotation
+    for (const ann of unprocessed) {
+      await saveAnnotation({ ...ann, processed: true })
+    }
+
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
+  }
+
+  const handleClearAll = async () => {
+    if (!confirmClear) {
+      setConfirmClear(true)
+      setTimeout(() => setConfirmClear(false), 2000)
+      return
+    }
+    setConfirmClear(false)
+    for (const ann of state.annotations) {
+      await deleteAnnotation(ann.id)
+    }
+    dispatch({ type: 'SET_ANNOTATIONS', annotations: [] })
+    dispatch({ type: 'SET_ACTIVE', id: null })
   }
 
   const toggleVision = () => {
@@ -27,9 +54,16 @@ export function ControlPanel() {
       <button
         class="va-btn va-btn--primary"
         onClick={handleCopy}
+        disabled={unprocessed.length === 0}
+      >
+        {copied ? 'COPIED!' : `COPY (${unprocessed.length})`}
+      </button>
+      <button
+        class="va-btn va-btn--danger"
+        onClick={handleClearAll}
         disabled={state.annotations.length === 0}
       >
-        {copied ? 'COPIED!' : `COPY (${state.annotations.length})`}
+        {confirmClear ? 'SURE?' : 'CLEAR ALL'}
       </button>
     </div>
   )

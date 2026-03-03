@@ -63,7 +63,7 @@ describe('Annotation Middleware', () => {
       id: 'ann_1', number: 1, timestamp: '2026-01-01T00:00:00Z',
       priority: 'high', element: { selector: 'h1', xpath: '/h1', tag: 'h1', textContent: '', boundingBox: { x: 0, y: 0, width: 0, height: 0 } },
       computedStyles: {}, targetStyles: {}, comment: 'test',
-      quickActions: [], quickActionIntents: [], screenshot: null, referenceImage: null,
+      quickActions: [], screenshot: null, referenceImage: null,
     }
     const req = createMockReq('POST', '/__annotations/api/annotations', ann)
     const res = createMockRes()
@@ -76,7 +76,7 @@ describe('Annotation Middleware', () => {
       id: 'ann_1', number: 1, timestamp: '2026-01-01T00:00:00Z',
       priority: 'high', element: { selector: 'h1', xpath: '/h1', tag: 'h1', textContent: '', boundingBox: { x: 0, y: 0, width: 0, height: 0 } },
       computedStyles: {}, targetStyles: {}, comment: '',
-      quickActions: [], quickActionIntents: [], screenshot: null, referenceImage: null,
+      quickActions: [], screenshot: null, referenceImage: null,
     }
     await storage.saveAnnotation(ann as any)
 

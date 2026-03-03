@@ -2,11 +2,15 @@ import { useContext, useEffect, useState, useRef } from 'preact/hooks'
 import { AppContext } from '../context'
 import type { Annotation } from '../../shared/types'
 
+const PIN_SIZE = 22
+const PIN_GAP = 4
+
 interface PinMarkerProps {
   annotation: Annotation
+  siblingIndex: number
 }
 
-export function PinMarker({ annotation }: PinMarkerProps) {
+export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
   const { dispatch } = useContext(AppContext)
   const [pos, setPos] = useState({ x: annotation.element.boundingBox.x, y: annotation.element.boundingBox.y })
   const observerRef = useRef<MutationObserver | null>(null)
@@ -40,18 +44,21 @@ export function PinMarker({ annotation }: PinMarkerProps) {
 
   const handleClick = () => {
     dispatch({ type: 'SET_ACTIVE', id: annotation.id })
-    dispatch({ type: 'SET_MODE', mode: 'annotating' })
+    dispatch({ type: 'SET_MODE', mode: annotation.processed ? 'reviewing' : 'annotating' })
   }
 
-  const priorityClass = `va-pin--${annotation.priority}`
+  const pinClass = annotation.processed
+    ? 'va-pin va-pin--processed'
+    : `va-pin va-pin--${annotation.priority}`
 
   return (
     <div
-      class={`va-pin ${priorityClass}`}
-      style={{ left: `${pos.x - 11}px`, top: `${pos.y - 11}px` }}
+      class={pinClass}
+      style={{ left: `${pos.x - 11 + siblingIndex * (PIN_SIZE + PIN_GAP)}px`, top: `${pos.y - 11}px` }}
       onClick={handleClick}
     >
       {annotation.number}
+      {annotation.processed && <span class="va-pin-check">{'\u2713'}</span>}
       <span class="va-pin-tooltip">
         {annotation.comment || 'No comment'}
       </span>

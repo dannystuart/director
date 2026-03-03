@@ -99,12 +99,47 @@
   color: #ff4444;
 }
 
+.va-comment-area {
+  padding: 8px 10px;
+  border-bottom: 1px solid #333;
+}
+
+.va-image-upload {
+  padding: 6px 10px;
+  border-bottom: 1px solid #333;
+}
+
+.va-image-upload-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.va-image-upload-btn:hover {
+  color: #e0e0e0;
+}
+
+.va-quick-actions-section {
+  padding: 8px 10px;
+  border-bottom: 1px solid #333;
+}
+
+.va-section-label {
+  color: #555;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
 .va-quick-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 8px 10px;
-  border-bottom: 1px solid #333;
 }
 
 .va-quick-action {
@@ -117,6 +152,9 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .va-quick-action:hover {
@@ -129,9 +167,41 @@
   color: #00ff41;
 }
 
-.va-comment-area {
-  padding: 8px 10px;
-  border-bottom: 1px solid #333;
+.va-quick-action-detail {
+  font-size: 9px;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+
+.va-sub-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.va-pill {
+  background: none;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #888;
+  padding: 2px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.va-pill:hover {
+  border-color: #e0e0e0;
+  color: #e0e0e0;
+}
+
+.va-pill--active {
+  border-color: #00ff41;
+  color: #00ff41;
+  background: rgba(0, 255, 65, 0.08);
 }
 
 .va-textarea {
@@ -321,8 +391,14 @@
   color: #00ff41;
 }
 
-.va-btn--primary:hover {
+.va-btn--primary:hover:not(:disabled) {
   background: rgba(0, 255, 65, 0.1);
+}
+
+.va-btn--primary:disabled {
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
 }
 
 .va-btn--danger {
@@ -446,4 +522,92 @@
 
 .va-card::-webkit-scrollbar-thumb {
   background: #333;
+}
+
+/* === Processed pins === */
+.va-pin--processed {
+  border-color: #666;
+  color: #666;
+}
+
+.va-pin--processed:hover {
+  background: #666;
+  color: #0a0a0a;
+}
+
+.va-pin--processed .va-pin-check {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  background: #0a0a0a;
+  border: 1px solid #666;
+  border-radius: 50%;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+/* === Review card (read-only) === */
+.va-review-card {
+  position: fixed;
+  z-index: 2147483645;
+  width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #0a0a0a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+.va-review-field {
+  padding: 6px 10px;
+  border-bottom: 1px solid #222;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.va-review-field-label {
+  color: #555;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.va-review-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #222;
+}
+
+.va-review-pill {
+  border: 1px solid #444;
+  color: #888;
+  padding: 2px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.va-review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.va-btn--rework {
+  border-color: #ffaa00;
+  color: #ffaa00;
+}
+
+.va-btn--rework:hover {
+  background: rgba(255, 170, 0, 0.1);
 }

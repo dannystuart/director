@@ -27,6 +27,8 @@ export function useScreenshot() {
         scale: 2,
         useCORS: true,
         logging: false,
+        ignoreElements: (el: Element) =>
+          el.hasAttribute('data-vibe-annotator') || !!el.closest('[data-vibe-annotator]'),
       })
 
       // Draw highlight outline on the element's position within the capture
