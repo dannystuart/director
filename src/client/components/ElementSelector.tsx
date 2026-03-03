@@ -88,6 +88,7 @@ export function ElementSelector() {
         quickActions: [],
         screenshot,
         referenceImage: null,
+        viewportWidth: state.viewport.width ?? window.innerWidth,
       }
 
       dispatch({ type: 'ADD_ANNOTATION', annotation })
@@ -95,14 +96,16 @@ export function ElementSelector() {
       dispatch({ type: 'SET_MODE', mode: 'annotating' })
     }
 
-    document.addEventListener('mousemove', onMouseMove, { capture: true })
-    document.addEventListener('click', onClick, { capture: true })
+    const targetDoc = state.viewport.iframe?.contentDocument ?? document
+
+    targetDoc.addEventListener('mousemove', onMouseMove, { capture: true })
+    targetDoc.addEventListener('click', onClick, { capture: true })
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove, { capture: true })
-      document.removeEventListener('click', onClick, { capture: true })
+      targetDoc.removeEventListener('mousemove', onMouseMove, { capture: true })
+      targetDoc.removeEventListener('click', onClick, { capture: true })
     }
-  }, [state.mode, state.annotations.length, dispatch, isAnnotatorElement, capture])
+  }, [state.mode, state.annotations.length, dispatch, isAnnotatorElement, capture, state.viewport.iframe])
 
   return (
     <>

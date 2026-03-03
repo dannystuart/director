@@ -3,6 +3,13 @@ import { AppContext } from '../context'
 import { buildExportMarkdown } from '../utils/export'
 import { saveAnnotation, deleteAnnotation } from '../utils/api'
 
+const VIEWPORT_PRESETS = [
+  { label: '375', width: 375 },
+  { label: '768', width: 768 },
+  { label: '1024', width: 1024 },
+  { label: 'Full', width: null as number | null },
+]
+
 export function ControlPanel() {
   const { state, dispatch } = useContext(AppContext)
   const [copied, setCopied] = useState(false)
@@ -47,6 +54,15 @@ export function ControlPanel() {
 
   return (
     <div class="va-control-panel">
+      {VIEWPORT_PRESETS.map((p) => (
+        <button
+          key={p.label}
+          class={`va-viewport-preset ${state.viewport.width === p.width ? 'va-viewport-preset--active' : ''}`}
+          onClick={() => dispatch({ type: 'SET_VIEWPORT', width: p.width })}
+        >
+          {p.label}
+        </button>
+      ))}
       <label class={`va-toggle ${state.visionMode ? 'va-toggle--active' : ''}`} onClick={toggleVision}>
         <span class="va-toggle-box">{state.visionMode ? '\u25A0' : ''}</span>
         VISION

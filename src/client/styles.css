@@ -846,6 +846,96 @@
   padding: 4px 12px;
 }
 
+/* --- Style Sliders --- */
+
+.va-slider-row {
+  display: grid;
+  grid-template-columns: 100px 50px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.va-slider-label {
+  font-size: 10px;
+  color: #888;
+  text-transform: lowercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.va-slider-value {
+  font-size: 11px;
+  color: #e0e0e0;
+  text-align: right;
+  cursor: pointer;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+}
+
+.va-slider-value:hover {
+  border-color: #333;
+  background: #111;
+}
+
+.va-slider-value-input {
+  width: 50px;
+  font-size: 11px;
+  font-family: inherit;
+  color: #e0e0e0;
+  background: #111;
+  border: 1px solid #00ff41;
+  padding: 2px 4px;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+
+.va-slider-value-input::-webkit-inner-spin-button,
+.va-slider-value-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.va-slider-value-input:focus {
+  outline: none;
+}
+
+.va-slider-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #333;
+  border-radius: 0;
+  outline: none;
+}
+
+.va-slider-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #00ff41;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.va-slider-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #00ff41;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.va-slider-font-family {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
 .va-card::-webkit-scrollbar {
   width: 6px;
 }
@@ -944,4 +1034,60 @@
 
 .va-btn--rework:hover {
   background: rgba(255, 170, 0, 0.1);
+}
+
+/* --- Responsive Viewport --- */
+
+.va-viewport-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483640;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+  overflow-y: auto;
+}
+
+.va-viewport-frame {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+  border: 1px solid #333;
+}
+
+.va-viewport-label {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #00ff41;
+  font-size: 11px;
+  font-family: 'Berkeley Mono', 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+}
+
+.va-viewport-iframe {
+  display: block;
+  height: 100vh;
+  border: none;
+}
+
+.va-viewport-preset {
+  padding: 4px 8px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #888;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.va-viewport-preset:hover {
+  border-color: #555;
+}
+
+.va-viewport-preset--active {
+  border-color: #00ff41;
+  color: #00ff41;
 }

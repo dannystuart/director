@@ -6,6 +6,7 @@ import { AnnotationCard } from './components/AnnotationCard'
 import { PinMarker } from './components/PinMarker'
 import { ControlPanel } from './components/ControlPanel'
 import { ReviewCard } from './components/ReviewCard'
+import { ViewportOverlay } from './components/ViewportOverlay'
 import { fetchAnnotations } from './utils/api'
 
 export function App() {
@@ -32,6 +33,9 @@ export function App() {
             .findIndex((a) => a.id === ann.id)
           return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
         })}
+      {state.viewport.width && state.mode !== 'inactive' && (
+        <ViewportOverlay width={state.viewport.width} />
+      )}
     </AppContext.Provider>
   )
 }

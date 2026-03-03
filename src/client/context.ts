@@ -13,6 +13,10 @@ export interface AppState {
     type: 'color' | 'font' | 'spacing' | 'insertion'
     element: HTMLElement | null
   } | null
+  viewport: {
+    width: number | null  // null = full/normal mode
+    iframe: HTMLIFrameElement | null
+  }
 }
 
 export type AppAction =
@@ -27,11 +31,19 @@ export type AppAction =
   | { type: 'MARK_PROCESSED'; ids: string[] }
   | { type: 'OPEN_SIDE_PANEL'; panel: 'color' | 'font' | 'spacing' | 'insertion'; element: HTMLElement }
   | { type: 'CLOSE_SIDE_PANEL' }
+  | { type: 'SET_VIEWPORT'; width: number | null }
+  | { type: 'SET_VIEWPORT_IFRAME'; iframe: HTMLIFrameElement | null }
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_MODE':
-      return { ...state, mode: action.mode, hoveredElement: null, sidePanel: null }
+      return {
+        ...state,
+        mode: action.mode,
+        hoveredElement: null,
+        sidePanel: null,
+        ...(action.mode === 'inactive' && { viewport: { width: null, iframe: null } }),
+      }
     case 'SET_ANNOTATIONS':
       return { ...state, annotations: action.annotations }
     case 'SET_ACTIVE':
@@ -66,6 +78,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, sidePanel: { type: action.panel, element: action.element } }
     case 'CLOSE_SIDE_PANEL':
       return { ...state, sidePanel: null }
+    case 'SET_VIEWPORT':
+      return { ...state, viewport: { ...state.viewport, width: action.width } }
+    case 'SET_VIEWPORT_IFRAME':
+      return { ...state, viewport: { ...state.viewport, iframe: action.iframe } }
     default:
       return state
   }
@@ -78,6 +94,7 @@ export const initialState: AppState = {
   visionMode: true,
   hoveredElement: null,
   sidePanel: null,
+  viewport: { width: null, iframe: null },
 }
 
 export const AppContext = createContext<{

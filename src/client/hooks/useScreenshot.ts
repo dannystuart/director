@@ -14,15 +14,21 @@ export function useScreenshot() {
     const rect = element.getBoundingClientRect()
     const padding = 200
 
+    // Determine target window/document
+    const isIframe = state.viewport.iframe?.contentDocument?.contains(element)
+    const targetBody = isIframe
+      ? state.viewport.iframe!.contentDocument!.body
+      : document.body
+
     // Hide annotator UI during capture
     const container = document.querySelector('[data-vibe-annotator]') as HTMLElement | null
     if (container) container.style.display = 'none'
 
     try {
-      const canvas = await html2canvas(document.body, {
+      const canvas = await html2canvas(targetBody, {
         x: 0,
-        y: Math.max(0, rect.top + window.scrollY - padding),
-        width: window.innerWidth,
+        y: Math.max(0, rect.top + (isIframe ? 0 : window.scrollY) - padding),
+        width: isIframe ? state.viewport.width ?? window.innerWidth : window.innerWidth,
         height: rect.height + padding * 2,
         scale: 2,
         useCORS: true,
@@ -47,7 +53,7 @@ export function useScreenshot() {
     } finally {
       if (container) container.style.display = ''
     }
-  }, [state.visionMode])
+  }, [state.visionMode, state.viewport])
 
   return { capture }
 }
