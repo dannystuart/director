@@ -2,6 +2,7 @@ import { h } from 'preact'
 import { useState, useEffect } from 'preact/hooks'
 import { SidePanel } from './SidePanel'
 import { extractPageColors } from '../utils/colorExtraction'
+import { getComputedStyleSafe } from '../utils/resolveElement'
 import type { DOMStateManager } from '../utils/domState'
 import type { PageColors } from '../utils/colorExtraction'
 
@@ -32,7 +33,7 @@ const CSS_PROP_MAP: Record<ColorProperty, string> = {
 }
 
 function getDefaultProperty(element: HTMLElement): ColorProperty {
-  const bg = getComputedStyle(element).backgroundColor
+  const bg = getComputedStyleSafe(element).backgroundColor
   if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
     return 'backgroundColor'
   }
@@ -56,7 +57,7 @@ export function ColorPickerPanel({ element, domState, onApply, onClose }: ColorP
     setColors(extractPageColors())
   }, [])
 
-  const originalColor = getComputedStyle(element).getPropertyValue(CSS_PROP_MAP[property])
+  const originalColor = getComputedStyleSafe(element).getPropertyValue(CSS_PROP_MAP[property])
 
   const previewColor = (value: string, tokenName: string | null = null) => {
     setActiveTokenName(tokenName)

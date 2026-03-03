@@ -2,6 +2,7 @@ import { h } from 'preact'
 import { useState, useEffect, useRef } from 'preact/hooks'
 import { SidePanel } from './SidePanel'
 import { StyleSlider } from './StyleSlider'
+import { getComputedStyleSafe } from '../utils/resolveElement'
 import type { DOMStateManager } from '../utils/domState'
 
 type PanelType = 'font' | 'spacing'
@@ -54,7 +55,7 @@ export function StyleSlidersPanel({ type, element, domState, onApply, onClose }:
   const initialValues = useRef<Record<string, number>>({})
 
   useEffect(() => {
-    const computed = getComputedStyle(element)
+    const computed = getComputedStyleSafe(element)
     const initial: Record<string, number> = {}
     for (const s of sliders) {
       initial[s.property] = parseNumericValue(computed.getPropertyValue(s.property))
@@ -81,7 +82,7 @@ export function StyleSlidersPanel({ type, element, domState, onApply, onClose }:
         changes[s.property] = `${values[s.property]}${s.unit}`
       }
     }
-    if (type === 'font' && fontFamily !== getComputedStyle(element).fontFamily) {
+    if (type === 'font' && fontFamily !== getComputedStyleSafe(element).fontFamily) {
       changes['font-family'] = fontFamily
     }
     onApply(changes)
