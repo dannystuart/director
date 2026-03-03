@@ -560,6 +560,56 @@
   padding: 12px;
 }
 
+/* --- Text Editor --- */
+
+.va-text-editor-overlay {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px dashed #00ff41;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.va-text-editor-textarea {
+  background: #111;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.va-text-editor-textarea:focus {
+  border-color: #00ff41;
+  outline: none;
+}
+
+.va-text-editor-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.va-text-editor-inline-actions {
+  position: fixed;
+  z-index: 2147483646;
+  background: #0a0a0a;
+  border: 1px solid #333;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+/* --- Interactive Actions --- */
+
+.va-interactive-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px;
+  border-top: 1px solid #1a1a1a;
+}
+
 .va-card::-webkit-scrollbar {
   width: 6px;
 }

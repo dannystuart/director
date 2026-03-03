@@ -1,6 +1,8 @@
 import { useContext, useState, useEffect, useRef } from 'preact/hooks'
 import { AppContext } from '../context'
 import { StylesDiff } from './StylesDiff'
+import { TextEditor } from './TextEditor'
+import { useDOMState } from '../hooks/useDOMState'
 import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
 import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles } from '../../shared/types'
 
@@ -77,6 +79,9 @@ export function AnnotationCard() {
   const [targetStyles, setTargetStyles] = useState<Partial<ComputedStyles>>({})
   const [referenceImage, setReferenceImage] = useState<string | null>(null)
   const [referencePreview, setReferencePreview] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState(false)
+  const [textChange, setTextChange] = useState<{ original: string; updated: string } | null>(null)
+  const domState = useDOMState()
 
   useEffect(() => {
     if (!annotation) return
@@ -172,6 +177,7 @@ export function AnnotationCard() {
       quickActions,
       targetStyles,
       referenceImage,
+      ...(textChange && { textChange }),
     }
 
     await saveAnnotation(updated)
@@ -206,6 +212,34 @@ export function AnnotationCard() {
         <span>#{annotation.number} {annotation.element.tag}.{annotation.element.selector.split('.').pop() ?? ''}</span>
         <button class="va-card-close" onClick={handleCancel}>{'\u2715'}</button>
       </div>
+
+      {/* Interactive actions — edit text */}
+      {annotation.element.textContent && (
+        <div class="va-interactive-actions">
+          <button
+            class={`va-quick-action ${editingText ? 'va-quick-action--active' : ''}`}
+            onClick={() => setEditingText(true)}
+          >
+            EDIT TEXT
+          </button>
+        </div>
+      )}
+
+      {editingText && (() => {
+        const el = document.querySelector(annotation.element.selector) as HTMLElement
+        if (!el) return null
+        return (
+          <TextEditor
+            element={el}
+            domState={domState}
+            onSave={(original, updated) => {
+              setEditingText(false)
+              setTextChange({ original, updated })
+            }}
+            onCancel={() => setEditingText(false)}
+          />
+        )
+      })()}
 
       {/* Comment box — primary input */}
       <div class="va-comment-area">
