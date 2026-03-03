@@ -30,6 +30,33 @@ export interface ComputedStyles {
   textTransform?: string
 }
 
+// --- Interactive feature types ---
+
+export type ChangeType = 'css' | 'text' | 'reorder' | 'dom'
+
+export interface DOMChange {
+  type: ChangeType
+  css?: Record<string, string>
+  text?: string
+  reorder?: { newIndex: number }
+  dom?: { html: string }
+}
+
+export interface StateSnapshot {
+  element: HTMLElement
+  inlineStyles: string
+  textContent: string
+  innerHTML: string
+  siblingIndex: number
+  parentSelector: string
+}
+
+export type InsertionElementType =
+  | 'heading' | 'paragraph' | 'button'
+  | 'divider' | 'container' | 'custom'
+
+export type InsertionPosition = 'before' | 'after' | 'inside'
+
 export type Priority = 'high' | 'medium' | 'low'
 
 export type QuickAction = 'color' | 'spacing' | 'font' | 'align'
@@ -68,6 +95,24 @@ export interface Annotation {
   screenshot: string | null
   referenceImage: string | null
   processed?: boolean
+  // Interactive feature fields (all optional, backwards compatible)
+  viewportWidth?: number
+  textChange?: {
+    original: string
+    updated: string
+  }
+  colorChange?: {
+    property: string
+    from: string
+    to: string
+    tokenName: string | null
+  }
+  insertion?: {
+    position: InsertionPosition
+    elementType: InsertionElementType
+    textContent: string
+    description: string
+  }
 }
 
 export interface PageInfo {
