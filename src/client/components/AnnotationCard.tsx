@@ -3,9 +3,10 @@ import { AppContext } from '../context'
 import { StylesDiff } from './StylesDiff'
 import { TextEditor } from './TextEditor'
 import { ColorPickerPanel } from './ColorPickerPanel'
+import { InsertionPanel } from './InsertionPanel'
 import { useDOMState } from '../hooks/useDOMState'
 import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
-import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles } from '../../shared/types'
+import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles, InsertionPosition } from '../../shared/types'
 
 const INTENT_STRINGS: Record<string, string> = {
   'color:too-dark': 'User flagged color is too dark',
@@ -83,6 +84,8 @@ export function AnnotationCard() {
   const [editingText, setEditingText] = useState(false)
   const [textChange, setTextChange] = useState<{ original: string; updated: string } | null>(null)
   const [colorChange, setColorChange] = useState<Annotation['colorChange'] | null>(null)
+  const [insertionPosition, setInsertionPosition] = useState<InsertionPosition | null>(null)
+  const [insertion, setInsertion] = useState<Annotation['insertion'] | null>(null)
   const domState = useDOMState()
 
   useEffect(() => {
@@ -181,6 +184,7 @@ export function AnnotationCard() {
       referenceImage,
       ...(textChange && { textChange }),
       ...(colorChange && { colorChange }),
+      ...(insertion && { insertion }),
     }
 
     await saveAnnotation(updated)
@@ -216,15 +220,39 @@ export function AnnotationCard() {
         <button class="va-card-close" onClick={handleCancel}>{'\u2715'}</button>
       </div>
 
-      {/* Interactive actions — edit text */}
-      {annotation.element.textContent && (
-        <div class="va-interactive-actions">
+      {/* Interactive actions — edit text + insert */}
+      <div class="va-interactive-actions">
+        {annotation.element.textContent && (
           <button
             class={`va-quick-action ${editingText ? 'va-quick-action--active' : ''}`}
             onClick={() => setEditingText(true)}
           >
             EDIT TEXT
           </button>
+        )}
+        <button
+          class={`va-quick-action ${insertionPosition !== null ? 'va-quick-action--active' : ''}`}
+          onClick={() => setInsertionPosition('after')}
+        >
+          INSERT
+        </button>
+      </div>
+
+      {insertionPosition !== null && (
+        <div class="va-insert-position-options">
+          {(['before', 'after', 'inside'] as InsertionPosition[]).map((pos) => (
+            <button
+              key={pos}
+              class={`va-quick-action ${insertionPosition === pos ? 'va-quick-action--active' : ''}`}
+              onClick={() => {
+                setInsertionPosition(pos)
+                const el = document.querySelector(annotation.element.selector) as HTMLElement
+                if (el) dispatch({ type: 'OPEN_SIDE_PANEL', panel: 'insertion', element: el })
+              }}
+            >
+              {pos.toUpperCase()}
+            </button>
+          ))}
         </div>
       )}
 
@@ -254,6 +282,22 @@ export function AnnotationCard() {
           }}
           onClose={() => {
             if (state.sidePanel?.element) domState.revert(state.sidePanel.element)
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+        />
+      )}
+
+      {state.sidePanel?.type === 'insertion' && insertionPosition && (
+        <InsertionPanel
+          position={insertionPosition}
+          targetSelector={annotation.element.selector}
+          onApply={(ins) => {
+            setInsertion(ins)
+            setInsertionPosition(null)
+            dispatch({ type: 'CLOSE_SIDE_PANEL' })
+          }}
+          onClose={() => {
+            setInsertionPosition(null)
             dispatch({ type: 'CLOSE_SIDE_PANEL' })
           }}
         />

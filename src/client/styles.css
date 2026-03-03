@@ -765,6 +765,87 @@
   cursor: not-allowed;
 }
 
+/* --- Insertion Panel --- */
+
+.va-insert-target {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.va-insert-target code {
+  color: #00ff41;
+}
+
+.va-insert-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.va-insert-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #ccc;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.va-insert-type-btn:hover {
+  border-color: #555;
+}
+
+.va-insert-type-btn--active {
+  border-color: #00ff41;
+  color: #00ff41;
+}
+
+.va-insert-type-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.va-insert-field {
+  margin-bottom: 8px;
+}
+
+.va-insert-label {
+  display: block;
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.va-insert-input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #111;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.va-insert-input:focus {
+  border-color: #00ff41;
+  outline: none;
+}
+
+.va-insert-position-options {
+  display: flex;
+  gap: 4px;
+  padding: 4px 12px;
+}
+
 .va-card::-webkit-scrollbar {
   width: 6px;
 }
