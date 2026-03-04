@@ -209,7 +209,17 @@
 
         .cmd-button::before {
             content: ">_";
+            font-size: 1.1rem;
             animation: blink 1s step-end infinite;
+        }
+
+        .cmd-button {
+            font-size: 0;
+        }
+
+        .cmd-button::after {
+            content: "Drag to Bookmarks Bar";
+            font-size: 1.1rem;
         }
 
         
@@ -452,9 +462,7 @@
             </p>
             
             <div class="bookmarklet-wrapper" vid="16">
-                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">
-                    Director
-                </a>
+                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">Director</a>
             </div>
         </section>
 
