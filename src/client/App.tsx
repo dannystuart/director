@@ -8,6 +8,7 @@ import { ControlPanel } from './components/ControlPanel'
 import { ReviewCard } from './components/ReviewCard'
 import { ViewportOverlay } from './components/ViewportOverlay'
 import { fetchAnnotations } from './utils/api'
+import { filterVisibleAnnotations } from './utils/pinFiltering'
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -27,12 +28,15 @@ export function App() {
       {state.mode === 'annotating' && state.activeAnnotation && <AnnotationCard />}
       {state.mode === 'reviewing' && state.activeAnnotation && <ReviewCard />}
       {state.mode !== 'inactive' &&
-        state.annotations.map((ann) => {
-          const siblingIndex = state.annotations
-            .filter((a) => a.element.selector === ann.element.selector)
-            .findIndex((a) => a.id === ann.id)
-          return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
-        })}
+        (() => {
+          const visible = filterVisibleAnnotations(state.annotations, state.viewport.width)
+          return visible.map((ann) => {
+            const siblingIndex = visible
+              .filter((a) => a.element.selector === ann.element.selector)
+              .findIndex((a) => a.id === ann.id)
+            return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
+          })
+        })()}
       {state.viewport.width && state.mode !== 'inactive' && (
         <ViewportOverlay width={state.viewport.width} />
       )}
