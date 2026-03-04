@@ -30,9 +30,9 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
       lines.push(`**Current text:** "${ann.element.textContent}"`)
     }
 
-    // Viewport (only for non-desktop)
-    if (ann.viewportWidth && ann.viewportWidth < 1024) {
-      const label = ann.viewportWidth <= 480 ? 'Mobile' : 'Tablet'
+    // Viewport — omit for Full mode (null/undefined), include for all presets
+    if (ann.viewportWidth != null) {
+      const label = ann.viewportWidth <= 480 ? 'Mobile' : ann.viewportWidth <= 768 ? 'Tablet' : 'Desktop'
       lines.push(`**Viewport:** ${ann.viewportWidth}px (${label})`)
     }
 

@@ -65,9 +65,19 @@ describe('buildExportMarkdown', () => {
     expect(md).toContain('**Viewport:** 768px (Tablet)')
   })
 
-  it('omits viewport for desktop widths >= 1024', () => {
-    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 1440 })])
+  it('omits viewport line for full-mode (null viewportWidth)', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: null })])
     expect(md).not.toContain('**Viewport:**')
+  })
+
+  it('includes viewport for 1024px as Desktop', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 1024 })])
+    expect(md).toContain('**Viewport:** 1024px (Desktop)')
+  })
+
+  it('includes viewport for desktop widths >= 1024', () => {
+    const md = buildExportMarkdown([makeAnnotation({ viewportWidth: 1440 })])
+    expect(md).toContain('**Viewport:** 1440px (Desktop)')
   })
 
   it('includes text change when present', () => {
