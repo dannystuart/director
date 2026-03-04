@@ -1,6 +1,7 @@
 import { render } from 'preact'
 import { App } from './App'
 import cssContent from 'virtual:inline-css'
+import { mountBridge } from './bridge'
 
 function mount() {
   const container = document.createElement('div')
@@ -14,8 +15,18 @@ function mount() {
   render(<App />, container)
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mount)
+if (window.self !== window.top) {
+  // Iframe: mount lightweight selection bridge only (no UI)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountBridge)
+  } else {
+    mountBridge()
+  }
 } else {
-  mount()
+  // Normal: mount full app
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mount)
+  } else {
+    mount()
+  }
 }
