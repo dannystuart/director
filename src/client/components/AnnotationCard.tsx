@@ -68,10 +68,23 @@ const CATEGORIES: { key: QuickAction; label: string }[] = [
   { key: 'align', label: 'ALIGN' },
 ]
 
+const TEXT_TAGS = new Set(['p', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'li',
+  'label', 'td', 'th', 'blockquote', 'code', 'em', 'strong', 'b', 'i', 'small', 'mark'])
+const CONTAINER_TAGS = new Set(['div', 'section', 'article', 'nav', 'header', 'footer',
+  'main', 'aside', 'ul', 'ol', 'form', 'fieldset', 'figure', 'table'])
+
+function getRelevantCategories(tag: string, hasChildren: boolean): QuickAction[] {
+  const t = tag.toLowerCase()
+  if (TEXT_TAGS.has(t)) return ['color', 'font', 'spacing', 'align']
+  if (CONTAINER_TAGS.has(t) && hasChildren) return ['spacing', 'align']
+  return ['color', 'font', 'spacing', 'align']
+}
+
 export function AnnotationCard() {
   const { state, dispatch } = useContext(AppContext)
   const annotation = state.annotations.find((a) => a.id === state.activeAnnotation)
   const iframe = state.viewport.iframe
+  const cardRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -107,9 +120,48 @@ export function AnnotationCard() {
       map.set(entry.category, entry.detail)
     }
     setSelectedActions(map)
+    setTextChange(annotation.textChange ?? null)
+    setColorChange(annotation.colorChange ?? null)
+    setInsertion(annotation.insertion ?? null)
 
     isNew.current = !annotation.comment && annotation.quickActions.length === 0
       && Object.keys(annotation.targetStyles).length === 0 && !annotation.referenceImage
+      && !annotation.textChange && !annotation.colorChange && !annotation.insertion
+  }, [annotation?.id])
+
+  // Close card on click outside
+  useEffect(() => {
+    if (!annotation) return
+
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as Element
+      if (!target) return
+      // Ignore clicks inside the card itself
+      if (cardRef.current?.contains(target)) return
+      // Ignore clicks on side panels (color picker, insertion panel, etc.)
+      if (target.closest('.va-side-panel, .va-text-editor-actions')) return
+      // Ignore clicks on pin markers (those have their own click handler)
+      if (target.closest('.va-pin')) return
+      // Ignore clicks on the annotated element (e.g. contentEditable text editing)
+      const resolvedEl = resolveElement(annotation.element.selector, iframe)
+      if (resolvedEl?.contains(target)) return
+
+      e.stopImmediatePropagation()
+      // Absorb the follow-up click so ElementSelector doesn't select a new element
+      const absorb = (ce: Event) => { ce.stopImmediatePropagation(); ce.preventDefault() }
+      document.addEventListener('click', absorb, { capture: true, once: true })
+      handleCancel()
+    }
+
+    // Use setTimeout to avoid catching the click that opened the card
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', onMouseDown)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('mousedown', onMouseDown)
+    }
   }, [annotation?.id])
 
   const toggleCategory = (key: QuickAction) => {
@@ -222,11 +274,19 @@ export function AnnotationCard() {
   const cardStyle = computeCardPosition(liveBox)
 
   return (
-    <div class="va-card" style={cardStyle}>
+    <div ref={cardRef} class="va-card" style={cardStyle}>
       <div class="va-card-header">
         <span>#{annotation.number} {annotation.element.tag}.{annotation.element.selector.split('.').pop() ?? ''}</span>
         <button class="va-card-close" onClick={handleCancel}>{'\u2715'}</button>
       </div>
+
+      {/* Text change preview */}
+      {textChange && !editingText && (
+        <div class="va-text-change-preview">
+          <div class="va-text-change-row"><span class="va-text-change-label">Before:</span> <span class="va-text-change-old">{textChange.original}</span></div>
+          <div class="va-text-change-row"><span class="va-text-change-label">After:</span> <span class="va-text-change-new">{textChange.updated}</span></div>
+        </div>
+      )}
 
       {/* Interactive actions — edit text (leaf nodes only) + insert */}
       <div class="va-interactive-actions">
@@ -235,7 +295,7 @@ export function AnnotationCard() {
             class={`va-quick-action ${editingText ? 'va-quick-action--active' : ''}`}
             onClick={() => setEditingText(true)}
           >
-            EDIT TEXT
+            {textChange ? 'RE-EDIT TEXT' : 'EDIT TEXT'}
           </button>
         )}
         <button
@@ -271,7 +331,7 @@ export function AnnotationCard() {
           domState={domState}
           onSave={(original, updated) => {
             setEditingText(false)
-            setTextChange({ original, updated })
+            setTextChange({ original: textChange?.original ?? original, updated })
           }}
           onCancel={() => setEditingText(false)}
         />
@@ -379,7 +439,10 @@ export function AnnotationCard() {
       <div class="va-quick-actions-section">
         <div class="va-section-label">Quick actions</div>
         <div class="va-quick-actions">
-          {CATEGORIES.map(({ key, label }) => {
+          {CATEGORIES.filter((c) => {
+            const relevant = getRelevantCategories(annotation.element.tag, (resolvedEl?.children.length ?? 0) > 0)
+            return relevant.includes(c.key)
+          }).map(({ key, label }) => {
             const isSelected = selectedActions.has(key)
             const selectedDetail = selectedActions.get(key)
             const selectedLabel = selectedDetail
@@ -412,7 +475,7 @@ export function AnnotationCard() {
             ))}
           </div>
         )}
-        {selectedActions.has('color') && (
+        {(expandedCategory === 'color' || selectedActions.has('color')) && (
           <button
             class="va-quick-action-drill"
             onClick={() => {
@@ -423,7 +486,7 @@ export function AnnotationCard() {
             Pick color...
           </button>
         )}
-        {selectedActions.has('font') && (
+        {(expandedCategory === 'font' || selectedActions.has('font')) && (
           <button
             class="va-quick-action-drill"
             onClick={() => {
@@ -434,7 +497,7 @@ export function AnnotationCard() {
             Adjust font...
           </button>
         )}
-        {selectedActions.has('spacing') && (
+        {(expandedCategory === 'spacing' || selectedActions.has('spacing')) && (
           <button
             class="va-quick-action-drill"
             onClick={() => {

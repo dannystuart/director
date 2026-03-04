@@ -43,9 +43,13 @@ export class DOMStateManager {
   revert(element: HTMLElement): void {
     const snap = this.snapshots.get(element)
     if (!snap) return
+    const change = this.changes.get(element)
 
     element.style.cssText = snap.inlineStyles
-    element.textContent = snap.textContent
+    // Only restore content if the change actually modified it (not CSS-only)
+    if (!change || change.type !== 'css') {
+      element.innerHTML = snap.innerHTML
+    }
 
     this.snapshots.delete(element)
     this.changes.delete(element)
@@ -65,8 +69,11 @@ export class DOMStateManager {
 
   revertAll(): void {
     for (const [element, snap] of this.snapshots) {
+      const change = this.changes.get(element)
       element.style.cssText = snap.inlineStyles
-      element.textContent = snap.textContent
+      if (!change || change.type !== 'css') {
+        element.innerHTML = snap.innerHTML
+      }
     }
     this.snapshots.clear()
     this.changes.clear()

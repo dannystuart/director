@@ -1,4 +1,4 @@
-import { useContext, useState } from 'preact/hooks'
+import { useContext, useState, useRef, useEffect } from 'preact/hooks'
 import { AppContext } from '../context'
 import { deleteAnnotation, saveAnnotation, imageUrl } from '../utils/api'
 import type { ComputedStyles } from '../../shared/types'
@@ -33,6 +33,34 @@ export function ReviewCard() {
   const { state, dispatch } = useContext(AppContext)
   const annotation = state.annotations.find((a) => a.id === state.activeAnnotation)
   const [stylesExpanded, setStylesExpanded] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Close card on click outside
+  useEffect(() => {
+    if (!annotation) return
+
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as Element
+      if (!target) return
+      if (cardRef.current?.contains(target)) return
+      if (target.closest('.va-pin')) return
+
+      e.stopImmediatePropagation()
+      // Absorb the follow-up click so ElementSelector doesn't select a new element
+      const absorb = (ce: Event) => { ce.stopImmediatePropagation(); ce.preventDefault() }
+      document.addEventListener('click', absorb, { capture: true, once: true })
+      handleClose()
+    }
+
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', onMouseDown)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('mousedown', onMouseDown)
+    }
+  }, [annotation?.id])
 
   if (!annotation) return null
 
@@ -63,7 +91,7 @@ export function ReviewCard() {
   )
 
   return (
-    <div class="va-review-card" style={cardStyle}>
+    <div ref={cardRef} class="va-review-card" style={cardStyle}>
       <div class="va-card-header">
         <span>#{annotation.number} {annotation.element.tag}.{annotation.element.selector.split('.').pop() ?? ''}</span>
         <button class="va-card-close" onClick={handleClose}>{'\u2715'}</button>
