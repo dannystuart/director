@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'preact/hooks'
+import { useReducer, useEffect, useMemo } from 'preact/hooks'
 import { AppContext, appReducer, initialState } from './context'
 import { FloatingIcon } from './components/FloatingIcon'
 import { ElementSelector } from './components/ElementSelector'
@@ -20,6 +20,11 @@ export function App() {
     })
   }, [])
 
+  const visibleAnnotations = useMemo(
+    () => filterVisibleAnnotations(state.annotations, state.viewport.width),
+    [state.annotations, state.viewport.width]
+  )
+
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       <FloatingIcon />
@@ -28,15 +33,12 @@ export function App() {
       {state.mode === 'annotating' && state.activeAnnotation && <AnnotationCard />}
       {state.mode === 'reviewing' && state.activeAnnotation && <ReviewCard />}
       {state.mode !== 'inactive' &&
-        (() => {
-          const visible = filterVisibleAnnotations(state.annotations, state.viewport.width)
-          return visible.map((ann) => {
-            const siblingIndex = visible
-              .filter((a) => a.element.selector === ann.element.selector)
-              .findIndex((a) => a.id === ann.id)
-            return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
-          })
-        })()}
+        visibleAnnotations.map((ann) => {
+          const siblingIndex = visibleAnnotations
+            .filter((a) => a.element.selector === ann.element.selector)
+            .findIndex((a) => a.id === ann.id)
+          return <PinMarker key={ann.id} annotation={ann} siblingIndex={siblingIndex} />
+        })}
       {state.viewport.width && state.mode !== 'inactive' && (
         <ViewportOverlay width={state.viewport.width} />
       )}
