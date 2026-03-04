@@ -114,6 +114,35 @@ describe('buildExportMarkdown', () => {
     expect(md).toContain('color: rgb(0, 0, 0) → #ff0000')
   })
 
+  it('adds conflict note when viewport pin targets same element as full-mode pin', () => {
+    const annotations = [
+      makeAnnotation({ id: 'a', number: 1, viewportWidth: null, element: { selector: 'nav.sidebar', xpath: '/html/body/nav', tag: 'nav', textContent: '', boundingBox: { x: 0, y: 0, width: 200, height: 40 } }, comment: 'Add more padding' }),
+      makeAnnotation({ id: 'b', number: 2, viewportWidth: 375, element: { selector: 'nav.sidebar', xpath: '/html/body/nav', tag: 'nav', textContent: '', boundingBox: { x: 0, y: 0, width: 200, height: 40 } }, comment: 'Collapse to hamburger' }),
+    ]
+    const md = buildExportMarkdown(annotations)
+    expect(md).toContain('**Note:** See also annotation #1 (general) for this element')
+  })
+
+  it('no conflict note when viewport pin has no matching full-mode pin', () => {
+    const annotations = [
+      makeAnnotation({ id: 'a', number: 1, viewportWidth: 375, comment: 'Mobile fix' }),
+      makeAnnotation({ id: 'b', number: 2, viewportWidth: 768, element: { selector: 'div.other', xpath: '/html/body/div', tag: 'div', textContent: '', boundingBox: { x: 0, y: 0, width: 200, height: 40 } }, comment: 'Tablet fix' }),
+    ]
+    const md = buildExportMarkdown(annotations)
+    expect(md).not.toContain('**Note:**')
+  })
+
+  it('no conflict note on full-mode pins themselves', () => {
+    const annotations = [
+      makeAnnotation({ id: 'a', number: 1, viewportWidth: null, comment: 'General fix' }),
+      makeAnnotation({ id: 'b', number: 2, viewportWidth: 375, element: { selector: 'nav.sidebar', xpath: '/html/body/nav', tag: 'nav', textContent: '', boundingBox: { x: 0, y: 0, width: 200, height: 40 } }, comment: 'Mobile fix' }),
+    ]
+    const md = buildExportMarkdown(annotations)
+    const lines = md.split('\n')
+    const ann1Section = md.slice(md.indexOf('Annotation 1'), md.indexOf('Annotation 2'))
+    expect(ann1Section).not.toContain('**Note:**')
+  })
+
   it('formats insertion annotation', () => {
     const ann = makeAnnotation({
       insertion: {

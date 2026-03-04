@@ -36,6 +36,16 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
       lines.push(`**Viewport:** ${ann.viewportWidth}px (${label})`)
     }
 
+    // Conflict awareness: link viewport pins to full-mode pins on same element
+    if (ann.viewportWidth != null) {
+      const fullModePins = sorted.filter(
+        (other) => other.id !== ann.id && other.viewportWidth == null && other.element.selector === ann.element.selector
+      )
+      for (const fp of fullModePins) {
+        lines.push(`**Note:** See also annotation #${fp.number} (general) for this element`)
+      }
+    }
+
     // Text change
     if (ann.textChange) {
       lines.push(`**Text change:** "${ann.textChange.original}" \u2192 "${ann.textChange.updated}"`)
