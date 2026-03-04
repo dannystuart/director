@@ -96,7 +96,7 @@ export interface Annotation {
   referenceImage: string | null
   processed?: boolean
   // Interactive feature fields (all optional, backwards compatible)
-  viewportWidth?: number
+  viewportWidth?: number | null
   textChange?: {
     original: string
     updated: string
