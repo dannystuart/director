@@ -472,6 +472,12 @@
   display: block;
 }
 
+.va-pin-viewport-tag {
+  color: #00ff41;
+  margin-right: 4px;
+  font-weight: 600;
+}
+
 .va-control-panel {
   position: fixed;
   z-index: 2147483646;
@@ -602,6 +608,39 @@
 }
 
 /* --- Interactive Actions --- */
+
+.va-text-change-preview {
+  padding: 6px 12px;
+  border-top: 1px solid #1a1a1a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.va-text-change-row {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.va-text-change-label {
+  color: #666;
+  flex-shrink: 0;
+}
+
+.va-text-change-old {
+  color: #ff4444;
+  text-decoration: line-through;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.va-text-change-new {
+  color: #00ff41;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .va-interactive-actions {
   display: flex;

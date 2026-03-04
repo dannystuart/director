@@ -15,6 +15,7 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
   const { state, dispatch } = useContext(AppContext)
   const iframe = state.viewport.iframe
   const [pos, setPos] = useState({ x: annotation.element.boundingBox.x, y: annotation.element.boundingBox.y })
+  const [visible, setVisible] = useState(true)
   const observerRef = useRef<MutationObserver | null>(null)
   const resizeRef = useRef<ResizeObserver | null>(null)
 
@@ -24,6 +25,9 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
       if (el) {
         const rect = resolveRect(el, iframe)
         setPos({ x: rect.left + window.scrollX, y: rect.top + window.scrollY })
+        setVisible(true)
+      } else {
+        setVisible(false)
       }
     }
 
@@ -42,9 +46,18 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
       resizeRef.current.observe(el)
     }
 
+    // Reposition on parent window resize (catches iframe moving/resizing)
+    window.addEventListener('resize', updatePos)
+
+    // Reposition on iframe content resize
+    const iframeWin = iframe?.contentWindow
+    iframeWin?.addEventListener('resize', updatePos)
+
     return () => {
       observerRef.current?.disconnect()
       resizeRef.current?.disconnect()
+      window.removeEventListener('resize', updatePos)
+      iframeWin?.removeEventListener('resize', updatePos)
     }
   }, [annotation.element.selector, iframe])
 
@@ -57,6 +70,8 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
     ? 'va-pin va-pin--processed'
     : `va-pin va-pin--${annotation.priority}`
 
+  if (!visible) return null
+
   return (
     <div
       class={pinClass}
@@ -66,6 +81,9 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
       {annotation.number}
       {annotation.processed && <span class="va-pin-check">{'\u2713'}</span>}
       <span class="va-pin-tooltip">
+        <span class="va-pin-viewport-tag">
+          [{annotation.viewportWidth == null ? 'Full' : `${annotation.viewportWidth}px`}]
+        </span>
         {annotation.comment || 'No comment'}
       </span>
     </div>
