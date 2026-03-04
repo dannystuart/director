@@ -209,17 +209,7 @@
 
         .cmd-button::before {
             content: ">_";
-            font-size: 1.1rem;
             animation: blink 1s step-end infinite;
-        }
-
-        .cmd-button {
-            font-size: 0;
-        }
-
-        .cmd-button::after {
-            content: "Drag to Bookmarks Bar";
-            font-size: 1.1rem;
         }
 
         
@@ -462,7 +452,7 @@
             </p>
             
             <div class="bookmarklet-wrapper" vid="16">
-                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">Director</a>
+                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">Drag to Bookmarks Bar</a>
             </div>
         </section>
 
@@ -542,6 +532,12 @@
             var code = "javascript:void((function(){if(window.__vibeAnnotator){window.__vibeAnnotator.toggle();return;}var s=document.createElement('script');s.src='" + src + "';document.head.appendChild(s);})())";
             var link = document.getElementById('bookmarklet-link');
             link.href = code;
+            link.addEventListener('dragstart', function() {
+                link.textContent = 'Director';
+            });
+            link.addEventListener('dragend', function() {
+                link.textContent = 'Drag to Bookmarks Bar';
+            });
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 alert('Drag this button to your bookmarks bar to install Director!');
