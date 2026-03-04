@@ -207,9 +207,19 @@
             box-shadow: 0 0 0 transparent;
         }
 
+        .cmd-button {
+            color: transparent;
+        }
+
         .cmd-button::before {
             content: ">_";
+            color: var(--accent-color);
             animation: blink 1s step-end infinite;
+        }
+
+        .cmd-button-label::before {
+            content: "Drag to Bookmarks Bar";
+            color: var(--accent-color);
         }
 
         
@@ -452,7 +462,7 @@
             </p>
             
             <div class="bookmarklet-wrapper" vid="16">
-                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">Drag to Bookmarks Bar</a>
+                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">Director<span class="cmd-button-label" aria-hidden="true"></span></a>
             </div>
         </section>
 
@@ -477,7 +487,7 @@
                     </li>
                     <li class="step-item" vid="31">
                         <span class="step-cmd" vid="32">[2] visit_target_site()</span>
-                        <span class="step-desc" vid="33">Navigate to localhost or any staging URL you want to critique.</span>
+                        <span class="step-desc" vid="33">Navigate to localhost or any staging URL you want to critique. Click bookmark to start Director. You will see it in the bottom-right of your screen.</span>
                     </li>
                     <li class="step-item" vid="34">
                         <span class="step-cmd" vid="35">[3] annotate_and_export()</span>
@@ -532,12 +542,6 @@
             var code = "javascript:void((function(){if(window.__vibeAnnotator){window.__vibeAnnotator.toggle();return;}var s=document.createElement('script');s.src='" + src + "';document.head.appendChild(s);})())";
             var link = document.getElementById('bookmarklet-link');
             link.href = code;
-            link.addEventListener('dragstart', function() {
-                link.textContent = 'Director';
-            });
-            link.addEventListener('dragend', function() {
-                link.textContent = 'Drag to Bookmarks Bar';
-            });
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 alert('Drag this button to your bookmarks bar to install Director!');
