@@ -17,6 +17,8 @@ export function buildExportMarkdown(annotations: Annotation[]): string {
     '',
     'Screenshots and reference images are in .ui-annotations/',
     '',
+    '**Important:** Style values below are browser-computed pixels. When applying changes, preserve the CSS conventions already in use in the codebase — convert px values to the appropriate units (rem, em, %, etc.) and use existing CSS custom properties (var(--…)) where applicable. Do not overwrite authored rem/em/variable-based values with raw px.',
+    '',
     '---',
   ]
 

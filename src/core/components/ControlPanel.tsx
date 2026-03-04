@@ -1,7 +1,7 @@
 import { useContext, useState } from 'preact/hooks'
 import { AppContext } from '../context'
+import { useStorage } from '../StorageContext'
 import { buildExportMarkdown } from '../utils/export'
-import { saveAnnotation, deleteAnnotation } from '../utils/api'
 
 const VIEWPORT_PRESETS = [
   { label: '375', width: 375 },
@@ -12,6 +12,7 @@ const VIEWPORT_PRESETS = [
 
 export function ControlPanel() {
   const { state, dispatch } = useContext(AppContext)
+  const storage = useStorage()
   const [copied, setCopied] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
 
@@ -27,7 +28,7 @@ export function ControlPanel() {
 
     // Persist each newly-processed annotation
     for (const ann of unprocessed) {
-      await saveAnnotation({ ...ann, processed: true })
+      await storage.update({ ...ann, processed: true })
     }
 
     setCopied(true)
@@ -42,7 +43,7 @@ export function ControlPanel() {
     }
     setConfirmClear(false)
     for (const ann of state.annotations) {
-      await deleteAnnotation(ann.id)
+      await storage.remove(ann.id)
     }
     dispatch({ type: 'SET_ANNOTATIONS', annotations: [] })
     dispatch({ type: 'SET_ACTIVE', id: null })

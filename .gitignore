@@ -6,3 +6,4 @@ dist/
 demo/node_modules/
 demo/pnpm-lock.yaml
 .worktrees/
+landing/bookmarklet.global.js

@@ -1,5 +1,6 @@
 import { useReducer, useEffect, useMemo } from 'preact/hooks'
 import { AppContext, appReducer, initialState } from './context'
+import { useStorage } from './StorageContext'
 import { FloatingIcon } from './components/FloatingIcon'
 import { ElementSelector } from './components/ElementSelector'
 import { AnnotationCard } from './components/AnnotationCard'
@@ -7,14 +8,14 @@ import { PinMarker } from './components/PinMarker'
 import { ControlPanel } from './components/ControlPanel'
 import { ReviewCard } from './components/ReviewCard'
 import { ViewportOverlay } from './components/ViewportOverlay'
-import { fetchAnnotations } from './utils/api'
 import { filterVisibleAnnotations } from './utils/pinFiltering'
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
+  const storage = useStorage()
 
   useEffect(() => {
-    fetchAnnotations().then((data) => {
+    storage.load().then((data) => {
       dispatch({ type: 'SET_ANNOTATIONS', annotations: data.annotations })
       dispatch({ type: 'SET_VISION_MODE', enabled: data.settings.visionMode })
     })

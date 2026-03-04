@@ -1,9 +1,10 @@
 import { useContext, useCallback } from 'preact/hooks'
 import { AppContext } from '../context'
-import { saveScreenshot } from '../utils/api'
+import { useStorage } from '../StorageContext'
 
 export function useScreenshot() {
   const { state } = useContext(AppContext)
+  const storage = useStorage()
 
   const capture = useCallback(async (element: Element): Promise<string | null> => {
     if (!state.visionMode) return null
@@ -49,7 +50,7 @@ export function useScreenshot() {
 
       const dataUrl = canvas.toDataURL('image/png', 0.8)
       const base64 = dataUrl.split(',')[1]
-      return await saveScreenshot(base64)
+      return await storage.saveImage(base64)
     } finally {
       if (container) container.style.display = ''
     }

@@ -5,7 +5,6 @@
  */
 import { generateSelector, generateXPath } from './utils/selector'
 import { captureComputedStyles } from './utils/styles'
-import { saveScreenshot } from './utils/api'
 
 // Inline styles matching the main app's highlight/tooltip aesthetic
 const BRIDGE_CSS = `
@@ -90,7 +89,7 @@ async function onClick(e: MouseEvent) {
   if (highlight) highlight.style.display = 'none'
   if (tooltip) tooltip.style.display = 'none'
 
-  let screenshotPath: string | null = null
+  let screenshotBase64: string | null = null
 
   if (visionMode) {
     try {
@@ -120,8 +119,7 @@ async function onClick(e: MouseEvent) {
       }
 
       const dataUrl = canvas.toDataURL('image/png', 0.8)
-      const base64 = dataUrl.split(',')[1]
-      screenshotPath = await saveScreenshot(base64)
+      screenshotBase64 = dataUrl.split(',')[1]
     } catch {
       // Screenshot failed — continue without it
     }
@@ -129,6 +127,7 @@ async function onClick(e: MouseEvent) {
 
   const rect = target.getBoundingClientRect()
 
+  // Send raw data to parent — parent handles storage via adapter
   window.parent.postMessage(
     {
       type: 'va:element-selected',
@@ -145,11 +144,15 @@ async function onClick(e: MouseEvent) {
         },
       },
       computedStyles: captureComputedStyles(target),
-      screenshot: screenshotPath,
+      screenshotBase64,
       viewportWidth: window.innerWidth,
     },
     '*'
   )
+}
+
+function suppressDefault(e: Event) {
+  e.preventDefault()
 }
 
 function startSelecting() {
@@ -157,6 +160,8 @@ function startSelecting() {
   active = true
   ensureDOM()
   document.addEventListener('mousemove', onMouseMove, { capture: true })
+  document.addEventListener('mousedown', suppressDefault, { capture: true })
+  document.addEventListener('touchstart', suppressDefault, { capture: true })
   document.addEventListener('click', onClick, { capture: true })
 }
 
@@ -164,6 +169,8 @@ function stopSelecting() {
   if (!active) return
   active = false
   document.removeEventListener('mousemove', onMouseMove, { capture: true })
+  document.removeEventListener('mousedown', suppressDefault, { capture: true })
+  document.removeEventListener('touchstart', suppressDefault, { capture: true })
   document.removeEventListener('click', onClick, { capture: true })
   if (highlight) highlight.style.display = 'none'
   if (tooltip) tooltip.style.display = 'none'

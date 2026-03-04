@@ -1,6 +1,6 @@
 import { useContext, useState, useRef, useEffect } from 'preact/hooks'
 import { AppContext } from '../context'
-import { deleteAnnotation, saveAnnotation, imageUrl } from '../utils/api'
+import { useStorage } from '../StorageContext'
 import type { ComputedStyles } from '../../shared/types'
 
 function camelToKebab(s: string): string {
@@ -31,6 +31,7 @@ function computeCardPosition(box: { x: number; y: number; width: number; height:
 
 export function ReviewCard() {
   const { state, dispatch } = useContext(AppContext)
+  const storage = useStorage()
   const annotation = state.annotations.find((a) => a.id === state.activeAnnotation)
   const [stylesExpanded, setStylesExpanded] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -70,7 +71,7 @@ export function ReviewCard() {
   }
 
   const handleResolve = async () => {
-    await deleteAnnotation(annotation.id)
+    await storage.remove(annotation.id)
     dispatch({ type: 'REMOVE_ANNOTATION', id: annotation.id })
     dispatch({ type: 'SET_ACTIVE', id: null })
     dispatch({ type: 'SET_MODE', mode: 'selecting' })
@@ -78,7 +79,7 @@ export function ReviewCard() {
 
   const handleRework = async () => {
     const updated = { ...annotation, processed: false }
-    await saveAnnotation(updated)
+    await storage.update(updated)
     dispatch({ type: 'UPDATE_ANNOTATION', annotation: updated })
     dispatch({ type: 'SET_ACTIVE', id: annotation.id })
     dispatch({ type: 'SET_MODE', mode: 'annotating' })
@@ -154,12 +155,12 @@ export function ReviewCard() {
         <div class="va-review-field">
           {annotation.screenshot && (
             <div class="va-ref-thumb">
-              <img src={imageUrl(annotation.screenshot)} alt="Screenshot" />
+              <img src={storage.resolveImageUrl(annotation.screenshot)} alt="Screenshot" />
             </div>
           )}
           {annotation.referenceImage && (
             <div class="va-ref-thumb" style={{ marginLeft: annotation.screenshot ? '8px' : '0' }}>
-              <img src={imageUrl(annotation.referenceImage)} alt="Reference" />
+              <img src={storage.resolveImageUrl(annotation.referenceImage)} alt="Reference" />
             </div>
           )}
         </div>

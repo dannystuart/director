@@ -7,7 +7,7 @@ import { InsertionPanel } from './InsertionPanel'
 import { StyleSlidersPanel } from './StyleSlidersPanel'
 import { useDOMState } from '../hooks/useDOMState'
 import { resolveElement, resolveRect } from '../utils/resolveElement'
-import { saveAnnotation, deleteAnnotation, saveReferenceImage, imageUrl } from '../utils/api'
+import { useStorage } from '../StorageContext'
 import type { Annotation, Priority, QuickAction, QuickActionDetail, QuickActionEntry, ComputedStyles, InsertionPosition } from '../../shared/types'
 
 const INTENT_STRINGS: Record<string, string> = {
@@ -82,6 +82,7 @@ function getRelevantCategories(tag: string, hasChildren: boolean): QuickAction[]
 
 export function AnnotationCard() {
   const { state, dispatch } = useContext(AppContext)
+  const storage = useStorage()
   const annotation = state.annotations.find((a) => a.id === state.activeAnnotation)
   const iframe = state.viewport.iframe
   const cardRef = useRef<HTMLDivElement>(null)
@@ -111,7 +112,7 @@ export function AnnotationCard() {
     setPriority(annotation.priority)
     setTargetStyles({ ...annotation.targetStyles })
     setReferenceImage(annotation.referenceImage)
-    setReferencePreview(annotation.referenceImage ? imageUrl(annotation.referenceImage) : null)
+    setReferencePreview(annotation.referenceImage ? storage.resolveImageUrl(annotation.referenceImage) : null)
     setExpandedCategory(null)
 
     // Restore selected actions from saved quickActions entries
@@ -191,9 +192,9 @@ export function AnnotationCard() {
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) return
     const base64 = await fileToBase64(file)
-    const filename = await saveReferenceImage(base64)
-    setReferenceImage(filename)
-    setReferencePreview(imageUrl(filename))
+    const ref = await storage.saveImage(base64)
+    setReferenceImage(ref)
+    setReferencePreview(storage.resolveImageUrl(ref))
   }
 
   const handlePaste = async (e: ClipboardEvent) => {
@@ -243,7 +244,7 @@ export function AnnotationCard() {
       ...(insertion && { insertion }),
     }
 
-    await saveAnnotation(updated)
+    await storage.save(updated)
     dispatch({ type: 'UPDATE_ANNOTATION', annotation: updated })
     dispatch({ type: 'SET_ACTIVE', id: null })
     dispatch({ type: 'SET_MODE', mode: 'selecting' })
@@ -259,7 +260,7 @@ export function AnnotationCard() {
 
   const handleDelete = async () => {
     if (!annotation) return
-    await deleteAnnotation(annotation.id)
+    await storage.remove(annotation.id)
     dispatch({ type: 'REMOVE_ANNOTATION', id: annotation.id })
     dispatch({ type: 'SET_ACTIVE', id: null })
     dispatch({ type: 'SET_MODE', mode: 'selecting' })

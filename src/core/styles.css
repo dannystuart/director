@@ -1130,3 +1130,49 @@
   border-color: #00ff41;
   color: #00ff41;
 }
+
+/* --- Breadcrumb Bar --- */
+
+.va-breadcrumb {
+  position: fixed;
+  z-index: 2147483642;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #0a0a0a;
+  border: 1px solid #333;
+  padding: 3px 8px;
+  pointer-events: auto;
+  white-space: nowrap;
+  max-width: 90vw;
+  overflow-x: auto;
+  font-size: 11px;
+}
+
+.va-breadcrumb-item {
+  background: none;
+  border: none;
+  color: #888;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.va-breadcrumb-item:hover {
+  color: #00ff41;
+}
+
+.va-breadcrumb-sep {
+  color: #555;
+  padding: 0 2px;
+  user-select: none;
+}
+
+.va-breadcrumb-current {
+  color: #e0e0e0;
+  padding: 2px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}

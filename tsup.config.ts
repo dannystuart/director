@@ -15,12 +15,21 @@ const inlineCssPlugin: Plugin = {
     }))
     build.onLoad({ filter: /.*/, namespace: 'inline-css' }, () => {
       const css = fs.readFileSync(
-        path.resolve(__dirname, 'src/client/styles.css'),
+        path.resolve(__dirname, 'src/core/styles.css'),
         'utf-8',
       )
       return { contents: `export default ${JSON.stringify(css)}`, loader: 'js' }
     })
   },
+}
+
+const browserOptions = {
+  esbuildPlugins: [inlineCssPlugin],
+  esbuildOptions(options: any) {
+    options.jsx = 'automatic'
+    options.jsxImportSource = 'preact'
+  },
+  noExternal: ['preact', 'html2canvas'],
 }
 
 export default defineConfig([
@@ -33,18 +42,22 @@ export default defineConfig([
     clean: true,
     external: ['vite'],
   },
-  // Client build (browser IIFE, injected by plugin)
+  // Client build (browser IIFE, injected by Vite plugin)
   {
-    entry: { client: 'src/client/index.tsx' },
+    entry: { client: 'src/adapters/vite/client.tsx' },
     format: ['iife'],
     globalName: 'VibeAnnotator',
     sourcemap: false,
     minify: true,
-    esbuildPlugins: [inlineCssPlugin],
-    esbuildOptions(options) {
-      options.jsx = 'automatic'
-      options.jsxImportSource = 'preact'
-    },
-    noExternal: ['preact', 'html2canvas'],
+    ...browserOptions,
+  },
+  // Bookmarklet build (browser IIFE, standalone)
+  {
+    entry: { bookmarklet: 'src/adapters/bookmarklet/index.tsx' },
+    format: ['iife'],
+    globalName: 'VibeAnnotatorBookmarklet',
+    sourcemap: false,
+    minify: true,
+    ...browserOptions,
   },
 ])

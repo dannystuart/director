@@ -1,0 +1,543 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">DIRECTOR | AI Feedback Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;family=Silkscreen:wght@400;700&amp;display=swap" rel="stylesheet" vid="7">
+    <style vid="8">
+        :root {
+            --bg-color: #050505;
+            --fg-color: #f0f0f0;
+            --accent-color: #00FF41; 
+            --accent-dim: #008F11;
+            --border-color: #f0f0f0;
+            --grid-color: rgba(0, 255, 65, 0.15);
+            --scanline-color: rgba(0, 0, 0, 0.5);
+            
+            --font-display: 'Silkscreen', cursive;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --border-width: 3px;
+            --spacer-unit: 1.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: text; 
+        }
+
+        
+        a, button, .interactive {
+            cursor: pointer;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--fg-color);
+            font-family: var(--font-mono);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.6;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.7;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 255, 65, 0.02);
+            z-index: 99;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            50% { opacity: 1.0; }
+            100% { opacity: 0.9; }
+        }
+
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        
+        .hero {
+            text-align: center;
+            padding: 2.25rem;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            color: var(--accent-color);
+            text-shadow: 
+                4px 4px 0px rgba(0,0,0,1),
+                0 0 20px rgba(0, 255, 65, 0.5);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        
+        .hero-title::after {
+            content: "✦";
+            position: absolute;
+            top: -20px;
+            right: -30px;
+            font-size: 0.6em;
+            color: var(--fg-color);
+            animation: spin 4s steps(8) infinite;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: #aaa;
+        }
+
+        
+        .bookmarklet-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+
+        .cmd-button {
+            position: relative;
+            background: black;
+            border: var(--border-width) solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 1rem 2rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 
+                4px 4px 0 var(--accent-dim),
+                8px 8px 0 rgba(0,0,0,0.8);
+            transition: transform 0.1s, box-shadow 0.1s;
+            overflow: hidden;
+        }
+
+        .cmd-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0;
+            background: var(--accent-color);
+            mix-blend-mode: difference;
+            pointer-events: none;
+            transition: none;
+        }
+
+        .cmd-button:hover::after {
+            animation: type-over 2s steps(40) forwards, block-blink 0.5s step-end infinite;
+        }
+
+        @keyframes type-over {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes block-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .cmd-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 transparent;
+        }
+
+        .cmd-button::before {
+            content: ">_";
+            animation: blink 1s step-end infinite;
+        }
+
+        
+        
+        .terminal-window {
+            background: #0a0a0a;
+            border: var(--border-width) solid var(--fg-color);
+            margin: 2rem auto;
+            max-width: 800px;
+            
+            box-shadow: 
+                0 0 0 4px var(--bg-color),
+                4px 4px 0 4px var(--fg-color),
+                0 0 0 8px var(--bg-color),
+                8px 8px 0 8px var(--fg-color);
+            position: relative;
+        }
+
+        .window-bar {
+            background: var(--fg-color);
+            color: var(--bg-color);
+            padding: 0.5rem 1rem;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: var(--border-width) solid var(--fg-color);
+        }
+
+        .window-controls span {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-family: var(--font-mono);
+            font-weight: bold;
+        }
+
+        .terminal-content {
+            padding: 2rem;
+            font-family: var(--font-mono);
+        }
+
+        .prompt-line {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-item {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+            border-left: 2px solid #333;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            background: var(--bg-color);
+            border: 2px solid var(--accent-color);
+        }
+
+        .step-cmd {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-desc {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 4.75rem 0;
+            margin: 6rem 0 3rem;
+        }
+
+        .feature-card {
+            border: 2px solid #333;
+            padding: 1.5rem;
+            background: #000;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 0 var(--accent-color);
+        }
+
+        
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #333;
+            transition: background 0.2s;
+        }
+        .feature-card:hover::before {
+            background: var(--accent-color);
+        }
+
+        .feature-text {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        
+        .warning-box {
+            border: 1px dashed #555;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #888;
+            margin: 2rem auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .warning-prefix {
+            color: #ffaa00;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 2px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .footer-links a {
+            color: #666;
+            margin-left: 1rem;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        
+        .progress-deco {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            color: #fff;
+        }
+        
+        .loading-bar {
+            height: 14px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-color),
+                var(--accent-color) 4px,
+                transparent 4px,
+                transparent 6px
+            );
+            width: 150px;
+            border: 2px solid #fff;
+            padding: 2px;
+        }
+
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        
+        .hero-title:hover {
+            animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: #fff;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .cmd-button { width: 100%; text-align: center; justify-content: center; }
+            .window-bar { display: none; } 
+            .terminal-window { box-shadow: 4px 4px 0 var(--fg-color); } 
+        }
+
+    </style>
+</head>
+<body vid="9">
+
+    
+    <div class="scanlines" vid="10"></div>
+    <div class="crt-flicker" vid="11"></div>
+
+    <div class="container" vid="12">
+        
+        
+        <section class="hero" vid="13">
+            <h1 class="hero-title" vid="14">DIRECTOR</h1>
+            <p class="hero-subtitle" vid="15">
+                Contextualize your codebase visually. Click elements on any website, describe issues, and generate structured feedback for your AI coding agents.
+            </p>
+            
+            <div class="bookmarklet-wrapper" vid="16">
+                <a id="bookmarklet-link" href="#" class="cmd-button" title="Drag to Bookmarks Bar" vid="17">
+                    Drag to Bookmarks Bar
+                </a>
+            </div>
+        </section>
+
+        
+        <section class="terminal-window" vid="18">
+            <div class="window-bar" vid="19">
+                <div class="window-title" vid="20">director@local ~ (zsh)</div>
+                <div class="window-controls" vid="21">
+                    <span vid="22">—</span>
+                    <span vid="23">□</span>
+                    <span vid="24">✕</span>
+                </div>
+            </div>
+            
+            <div class="terminal-content" vid="25">
+                <div class="prompt-line" vid="26">user@machine:~$ ./how_it_works.sh</div>
+                
+                <ul class="step-list" vid="27">
+                    <li class="step-item" vid="28">
+                        <span class="step-cmd" vid="29">[1] install_bookmarklet()</span>
+                        <span class="step-desc" vid="30">Drag the button above to your browser's bookmarks bar. No extension store required.</span>
+                    </li>
+                    <li class="step-item" vid="31">
+                        <span class="step-cmd" vid="32">[2] visit_target_site()</span>
+                        <span class="step-desc" vid="33">Navigate to localhost or any staging URL you want to critique.</span>
+                    </li>
+                    <li class="step-item" vid="34">
+                        <span class="step-cmd" vid="35">[3] annotate_and_export()</span>
+                        <span class="step-desc" vid="36">Click elements to attach notes. Director formats the DOM node + your directions into a prompt you can give to any vibe coding LLM.</span>
+                    </li>
+                </ul>
+
+                <div class="progress-deco" vid="37">
+                    <div class="loading-bar" vid="38"></div>
+                    <span vid="39">SYSTEM READY</span>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="features" vid="40">
+            <div class="feature-card" vid="41">
+                <h3 vid="42">Universal</h3>
+                <p class="feature-text" vid="43">Injects into any DOM. Works on localhost, production, and behind VPNs.</p>
+            </div>
+            <div class="feature-card" vid="44">
+                <h3 vid="45">AI-Native</h3>
+                <p class="feature-text" vid="46">Outputs structured context (HTML + CSS + Comment) optimized for LLMs.</p>
+            </div>
+            <div class="feature-card" vid="47">
+                <h3 vid="48">Zero Setup</h3>
+                <p class="feature-text" vid="49">No npm install. No build steps. Just a Javascript bookmarklet.</p>
+            </div>
+            <div class="feature-card" vid="50">
+                <h3 vid="51">Chrome Ext</h3>
+                <p class="feature-text" style="color: #666;" vid="52">Coming soon. Will include screenshot capabilities.</p>
+            </div>
+        </section>
+
+        
+        <div class="warning-box" vid="53">
+            <span class="warning-prefix" vid="54">// NOTE:</span>
+            Content Security Policy (CSP) headers on sites like GitHub or Banking apps may block bookmarklet injection.
+        </div>
+
+        
+        <footer vid="55">
+            <div vid="56">© 2026 Director. Built by <a href="https://threads.com/dannystuart" style="color: #666; text-decoration: none; border-bottom: 1px solid transparent;" onmouseover="this.style.color='var(--accent-color)';this.style.borderBottomColor='var(--accent-color)'" onmouseout="this.style.color='#666';this.style.borderBottomColor='transparent'">@dannystuart</a></div>
+        </footer>
+
+    </div>
+
+    <script>
+        (function() {
+            var origin = window.location.origin;
+            var src = origin + '/bookmarklet.global.js';
+            var code = "javascript:void((function(){if(window.__vibeAnnotator){window.__vibeAnnotator.toggle();return;}var s=document.createElement('script');s.src='" + src + "';document.head.appendChild(s);})())";
+            var link = document.getElementById('bookmarklet-link');
+            link.href = code;
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Drag this button to your bookmarks bar to install Director!');
+            });
+        })();
+    </script>
+
+</body></html>
