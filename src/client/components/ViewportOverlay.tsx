@@ -30,6 +30,7 @@ export function ViewportOverlay({ width }: ViewportOverlayProps) {
       <div class="va-viewport-frame" style={{ width: `${width}px` }}>
         <div class="va-viewport-label">{width}px</div>
         <iframe
+          key={width}
           ref={iframeRef}
           class="va-viewport-iframe"
           src={window.location.href}

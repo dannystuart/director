@@ -49,15 +49,17 @@ export function PinMarker({ annotation, siblingIndex }: PinMarkerProps) {
     // Reposition on parent window resize (catches iframe moving/resizing)
     window.addEventListener('resize', updatePos)
 
-    // Reposition on iframe content resize
+    // Reposition on iframe content resize or scroll
     const iframeWin = iframe?.contentWindow
     iframeWin?.addEventListener('resize', updatePos)
+    iframeWin?.addEventListener('scroll', updatePos)
 
     return () => {
       observerRef.current?.disconnect()
       resizeRef.current?.disconnect()
       window.removeEventListener('resize', updatePos)
       iframeWin?.removeEventListener('resize', updatePos)
+      iframeWin?.removeEventListener('scroll', updatePos)
     }
   }, [annotation.element.selector, iframe])
 
