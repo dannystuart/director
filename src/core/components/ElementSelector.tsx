@@ -254,18 +254,16 @@ export function ElementSelector() {
       // Avoid rebuilding when still on same element
       if (target === lastTargetRef.current) return
 
-      // If breadcrumb is visible, delay the rebuild so user can reach it
+      // Always debounce rebuilds to prevent rapid highlight switching
+      // between nested elements — longer delay when breadcrumb is visible
+      // so the user can reach it
       const breadcrumbVisible = breadcrumbRef.current?.style.display !== 'none' && ancestorsRef.current.length > 0
-      if (breadcrumbVisible) {
-        if (rebuildTimeoutRef.current) clearTimeout(rebuildTimeoutRef.current)
-        rebuildTimeoutRef.current = setTimeout(() => {
-          rebuildTimeoutRef.current = null
-          rebuildFor(target)
-        }, 150)
-        return
-      }
-
-      rebuildFor(target)
+      const delay = breadcrumbVisible ? 150 : 60
+      if (rebuildTimeoutRef.current) clearTimeout(rebuildTimeoutRef.current)
+      rebuildTimeoutRef.current = setTimeout(() => {
+        rebuildTimeoutRef.current = null
+        rebuildFor(target)
+      }, delay)
     }
 
     const onClick = async (e: MouseEvent) => {

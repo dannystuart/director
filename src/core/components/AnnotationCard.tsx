@@ -574,8 +574,13 @@ function computeCardPosition(box: { x: number; y: number; width: number; height:
   if (box.y + box.height + gap + cardMaxHeight < vh) {
     return { left: `${Math.max(margin, box.x)}px`, top: `${box.y + box.height + gap}px` }
   }
-  // Above
-  return { left: `${Math.max(margin, box.x)}px`, bottom: `${vh - box.y + gap}px` }
+  // Above — only if there's enough room above the element
+  if (box.y > cardMaxHeight + gap + margin) {
+    return { left: `${Math.max(margin, box.x)}px`, bottom: `${vh - box.y + gap}px` }
+  }
+  // Fallback for large elements that span most of the viewport:
+  // overlay card at top-right corner
+  return { right: `${margin}px`, top: `${margin}px` }
 }
 
 /** Map CSS property names (kebab-case) to ComputedStyles keys (camelCase) */
