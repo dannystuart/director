@@ -15,7 +15,26 @@ export function ViewportOverlay({ width }: ViewportOverlayProps) {
     if (!iframe) return
 
     const handleLoad = () => {
-      dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
+      const iframeDoc = iframe.contentDocument
+
+      // Find the Director script in the parent page (bookmarklet or client bundle)
+      const directorScript = Array.from(document.querySelectorAll('script[src]'))
+        .find(s => {
+          const src = (s as HTMLScriptElement).src
+          return src.includes('bookmarklet') || src.includes('client')
+        }) as HTMLScriptElement | undefined
+
+      if (iframeDoc && directorScript) {
+        // Re-inject the script into the iframe so the bridge mounts
+        // (mountApp detects iframe context and calls mountBridge)
+        const s = iframeDoc.createElement('script')
+        s.src = directorScript.src
+        s.onload = () => dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
+        iframeDoc.head.appendChild(s)
+      } else {
+        // Vite plugin case — bridge already injected by the plugin
+        dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
+      }
     }
 
     iframe.addEventListener('load', handleLoad)
