@@ -8,3 +8,4 @@ demo/pnpm-lock.yaml
 .worktrees/
 landing/bookmarklet.global.js
 test-results/
+screenshots/
