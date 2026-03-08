@@ -9,3 +9,5 @@ demo/pnpm-lock.yaml
 landing/bookmarklet.global.js
 test-results/
 screenshots/
+video/pnpm-lock.yaml
+video/out/
