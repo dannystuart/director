@@ -2,6 +2,20 @@
     <meta charset="UTF-8" vid="2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
     <title vid="4">DIRECTOR | AI Feedback Tool</title>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="DIRECTOR | AI Feedback Tool">
+    <meta property="og:description" content="Click elements on any website, describe issues, and generate structured feedback for your AI coding agents.">
+    <meta property="og:image" content="https://director-blue.vercel.app/og/director-og.png">
+    <meta property="og:url" content="https://director-blue.vercel.app">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DIRECTOR | AI Feedback Tool">
+    <meta name="twitter:description" content="Click elements on any website, describe issues, and generate structured feedback for your AI coding agents.">
+    <meta name="twitter:image" content="https://director-blue.vercel.app/og/director-og.png">
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23050505'/><text x='4' y='23' font-family='monospace' font-weight='bold' font-size='18' fill='%2300FF41'>%3E_</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
@@ -442,6 +456,7 @@
         /* Tablet */
         @media (max-width: 1024px) {
             .container { padding: 1.5rem; }
+            .hero-title { font-size: 5rem; }
             .features { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin: 4rem 0 2rem; padding: 3rem 0; }
             .terminal-window { max-width: 100%; }
         }
@@ -450,7 +465,7 @@
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             .hero { padding: 1.5rem 0.5rem; }
-            .hero-title { font-size: 2.5rem; }
+            .hero-title { font-size: 5rem; }
             .hero-title::after { top: -14px; right: -20px; font-size: 0.5em; }
             .hero-subtitle { font-size: 0.95rem; margin-bottom: 2rem; }
             .bookmarklet-wrapper { margin-bottom: 2.5rem; }
@@ -476,7 +491,7 @@
         /* Small phones */
         @media (max-width: 400px) {
             .container { padding: 0.75rem; }
-            .hero-title { font-size: 2rem; }
+            .hero-title { font-size: 2.75rem; }
             .hero-subtitle { font-size: 0.85rem; }
             .terminal-content { padding: 1rem; }
             .step-item { padding-left: 1rem; }
