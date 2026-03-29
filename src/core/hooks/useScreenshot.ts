@@ -51,6 +51,9 @@ export function useScreenshot() {
       const dataUrl = canvas.toDataURL('image/png', 0.8)
       const base64 = dataUrl.split(',')[1]
       return await storage.saveImage(base64)
+    } catch {
+      // html2canvas doesn't support some modern CSS (e.g. oklab colors) — skip screenshot
+      return null
     } finally {
       if (container) container.style.display = ''
     }
