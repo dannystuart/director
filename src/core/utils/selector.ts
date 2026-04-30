@@ -18,14 +18,22 @@ export function generateSelector(el: Element): string {
   if (testId) return `[data-testid="${testId}"]`
 
   // Priority 2: id
-  if (el.id && document.querySelectorAll(`#${cssEscape(el.id)}`).length === 1) {
-    return `#${cssEscape(el.id)}`
+  if (el.id) {
+    try {
+      if (document.querySelectorAll(`#${cssEscape(el.id)}`).length === 1) {
+        return `#${cssEscape(el.id)}`
+      }
+    } catch { /* invalid selector — fall through */ }
   }
 
   // Priority 3: meaningful class path
   const classPath = buildClassPath(el)
-  if (classPath && document.querySelectorAll(classPath).length === 1) {
-    return classPath
+  if (classPath) {
+    try {
+      if (document.querySelectorAll(classPath).length === 1) {
+        return classPath
+      }
+    } catch { /* invalid selector — fall through */ }
   }
 
   // Priority 4: structural nth-child path
@@ -41,7 +49,7 @@ function buildClassPath(el: Element): string | null {
     const meaningful = Array.from(current.classList).filter((c) => !GENERIC_CLASSES.has(c))
 
     if (meaningful.length > 0) {
-      parts.unshift(`${tag}.${meaningful[0]}`)
+      parts.unshift(`${tag}.${cssEscape(meaningful[0])}`)
     } else if (current.id) {
       parts.unshift(`#${cssEscape(current.id)}`)
       break

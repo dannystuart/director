@@ -55,42 +55,46 @@ export function ElementSelector() {
   }, [])
 
   const selectElement = useCallback(async (target: Element) => {
-    const screenshot = await capture(target)
-    const rect = target.getBoundingClientRect()
-    const textContent = (target.textContent ?? '').trim().slice(0, 100)
+    try {
+      const screenshot = await capture(target)
+      const rect = target.getBoundingClientRect()
+      const textContent = (target.textContent ?? '').trim().slice(0, 100)
 
-    const id = `ann_${Date.now()}`
-    const number = state.annotations.length + 1
+      const id = `ann_${Date.now()}`
+      const number = state.annotations.length + 1
 
-    const annotation = {
-      id,
-      number,
-      timestamp: new Date().toISOString(),
-      priority: 'medium' as const,
-      element: {
-        selector: generateSelector(target),
-        xpath: generateXPath(target),
-        tag: target.tagName.toLowerCase(),
-        textContent,
-        boundingBox: {
-          x: rect.x,
-          y: rect.y,
-          width: rect.width,
-          height: rect.height,
+      const annotation = {
+        id,
+        number,
+        timestamp: new Date().toISOString(),
+        priority: 'medium' as const,
+        element: {
+          selector: generateSelector(target),
+          xpath: generateXPath(target),
+          tag: target.tagName.toLowerCase(),
+          textContent,
+          boundingBox: {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+          },
         },
-      },
-      computedStyles: captureComputedStyles(target),
-      targetStyles: {},
-      comment: '',
-      quickActions: [],
-      screenshot,
-      referenceImage: null,
-      viewportWidth: state.viewport.width ?? null,
-    }
+        computedStyles: captureComputedStyles(target),
+        targetStyles: {},
+        comment: '',
+        quickActions: [],
+        screenshot,
+        referenceImage: null,
+        viewportWidth: state.viewport.width ?? null,
+      }
 
-    dispatch({ type: 'ADD_ANNOTATION', annotation })
-    dispatch({ type: 'SET_ACTIVE', id })
-    dispatch({ type: 'SET_MODE', mode: 'annotating' })
+      dispatch({ type: 'ADD_ANNOTATION', annotation })
+      dispatch({ type: 'SET_ACTIVE', id })
+      dispatch({ type: 'SET_MODE', mode: 'annotating' })
+    } catch (err) {
+      console.error('[vibe-annotator] Failed to select element:', err)
+    }
   }, [capture, state.annotations.length, state.viewport.width, dispatch])
 
   const positionHighlight = useCallback((el: Element) => {
