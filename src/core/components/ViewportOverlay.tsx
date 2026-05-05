@@ -60,7 +60,16 @@ export function ViewportOverlay({ width }: ViewportOverlayProps) {
 
     iframe.addEventListener('load', handleLoad)
 
-    if (iframe.contentDocument?.readyState === 'complete') {
+    // Handle race: iframe may already be loaded before the listener attaches
+    // (fast localhost). Skip the about:blank case — newly-created iframes show
+    // about:blank with readyState=complete BEFORE navigating to src; calling
+    // handleLoad then would inject the bridge into about:blank, which then
+    // gets destroyed on the real navigation, leaving listeners on a dead doc.
+    const doc = iframe.contentDocument
+    if (
+      doc?.readyState === 'complete' &&
+      doc.location?.href !== 'about:blank'
+    ) {
       console.log('[VA] iframe already loaded, calling handleLoad immediately')
       handleLoad()
     }
