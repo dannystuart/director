@@ -14,49 +14,54 @@ export function ViewportOverlay({ width }: ViewportOverlayProps) {
     const iframe = iframeRef.current
     if (!iframe) return
 
+    console.log('[VA] ViewportOverlay effect mounted, width=', width)
+
     let handled = false
 
     const handleLoad = () => {
       if (handled) return
       handled = true
+      console.log('[VA] iframe load fired, readyState=', iframe.contentDocument?.readyState)
 
       const iframeDoc = iframe.contentDocument
 
-      // Bookmarklet mode sets window.__vibeAnnotator; vite plugin does not.
-      // In bookmarklet mode we MUST find and re-inject the Director script
-      // because the iframe loads the bare page URL with no Director code.
       const isBookmarkletMode = !!(window as { __vibeAnnotator?: unknown }).__vibeAnnotator
+      console.log('[VA] isBookmarkletMode=', isBookmarkletMode)
 
-      // Match exact known filenames so we don't accidentally pick up
-      // framework scripts (e.g. Next.js _next/.../client.js, react-dom-client).
-      const directorScript = Array.from(document.querySelectorAll('script[src]'))
+      const allScripts = Array.from(document.querySelectorAll('script[src]'))
+      console.log('[VA] parent scripts:', allScripts.map(s => (s as HTMLScriptElement).src))
+
+      const directorScript = allScripts
         .find(s => {
           const src = (s as HTMLScriptElement).src
           return src.endsWith('/bookmarklet.global.js') || src.endsWith('/client.global.js')
         }) as HTMLScriptElement | undefined
 
+      console.log('[VA] directorScript found:', directorScript?.src ?? 'NONE')
+
       if (isBookmarkletMode && iframeDoc && directorScript) {
         const s = iframeDoc.createElement('script')
         s.src = directorScript.src
-        s.onload = () => dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
+        s.onload = () => {
+          console.log('[VA] re-injected script loaded in iframe')
+          dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
+        }
+        s.onerror = () => console.error('[VA] re-injected script FAILED to load in iframe')
         iframeDoc.head.appendChild(s)
+        console.log('[VA] re-injected script appended')
       } else if (isBookmarkletMode) {
-        console.warn(
-          '[vibe-annotator] Bookmarklet mode detected but Director script not found in parent. ' +
-          'Viewport iframe selection will not work.'
-        )
+        console.warn('[VA] bookmarklet mode but Director script NOT found in parent')
         dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
       } else {
-        // Vite plugin case — bridge already injected by the plugin
+        console.log('[VA] vite plugin path — assuming bridge already in iframe')
         dispatch({ type: 'SET_VIEWPORT_IFRAME', iframe })
       }
     }
 
     iframe.addEventListener('load', handleLoad)
 
-    // Handle race: on fast localhost loads the iframe may already be ready
-    // by the time this effect runs, so the load event fires before we attach.
     if (iframe.contentDocument?.readyState === 'complete') {
+      console.log('[VA] iframe already loaded, calling handleLoad immediately')
       handleLoad()
     }
 
