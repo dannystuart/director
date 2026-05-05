@@ -161,7 +161,7 @@ function startSelecting() {
   ensureDOM()
   document.addEventListener('mousemove', onMouseMove, { capture: true })
   document.addEventListener('mousedown', suppressDefault, { capture: true })
-  document.addEventListener('touchstart', suppressDefault, { capture: true })
+  document.addEventListener('touchstart', suppressDefault, { capture: true, passive: false })
   document.addEventListener('click', onClick, { capture: true })
 }
 

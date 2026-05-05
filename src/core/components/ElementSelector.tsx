@@ -55,42 +55,46 @@ export function ElementSelector() {
   }, [])
 
   const selectElement = useCallback(async (target: Element) => {
-    const screenshot = await capture(target)
-    const rect = target.getBoundingClientRect()
-    const textContent = (target.textContent ?? '').trim().slice(0, 100)
+    try {
+      const screenshot = await capture(target)
+      const rect = target.getBoundingClientRect()
+      const textContent = (target.textContent ?? '').trim().slice(0, 100)
 
-    const id = `ann_${Date.now()}`
-    const number = state.annotations.length + 1
+      const id = `ann_${Date.now()}`
+      const number = state.annotations.length + 1
 
-    const annotation = {
-      id,
-      number,
-      timestamp: new Date().toISOString(),
-      priority: 'medium' as const,
-      element: {
-        selector: generateSelector(target),
-        xpath: generateXPath(target),
-        tag: target.tagName.toLowerCase(),
-        textContent,
-        boundingBox: {
-          x: rect.x,
-          y: rect.y,
-          width: rect.width,
-          height: rect.height,
+      const annotation = {
+        id,
+        number,
+        timestamp: new Date().toISOString(),
+        priority: 'medium' as const,
+        element: {
+          selector: generateSelector(target),
+          xpath: generateXPath(target),
+          tag: target.tagName.toLowerCase(),
+          textContent,
+          boundingBox: {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+          },
         },
-      },
-      computedStyles: captureComputedStyles(target),
-      targetStyles: {},
-      comment: '',
-      quickActions: [],
-      screenshot,
-      referenceImage: null,
-      viewportWidth: state.viewport.width ?? null,
-    }
+        computedStyles: captureComputedStyles(target),
+        targetStyles: {},
+        comment: '',
+        quickActions: [],
+        screenshot,
+        referenceImage: null,
+        viewportWidth: state.viewport.width ?? null,
+      }
 
-    dispatch({ type: 'ADD_ANNOTATION', annotation })
-    dispatch({ type: 'SET_ACTIVE', id })
-    dispatch({ type: 'SET_MODE', mode: 'annotating' })
+      dispatch({ type: 'ADD_ANNOTATION', annotation })
+      dispatch({ type: 'SET_ACTIVE', id })
+      dispatch({ type: 'SET_MODE', mode: 'annotating' })
+    } catch (err) {
+      console.error('[vibe-annotator] Failed to select element:', err)
+    }
   }, [capture, state.annotations.length, state.viewport.width, dispatch])
 
   const positionHighlight = useCallback((el: Element) => {
@@ -254,18 +258,16 @@ export function ElementSelector() {
       // Avoid rebuilding when still on same element
       if (target === lastTargetRef.current) return
 
-      // If breadcrumb is visible, delay the rebuild so user can reach it
+      // Always debounce rebuilds to prevent rapid highlight switching
+      // between nested elements — longer delay when breadcrumb is visible
+      // so the user can reach it
       const breadcrumbVisible = breadcrumbRef.current?.style.display !== 'none' && ancestorsRef.current.length > 0
-      if (breadcrumbVisible) {
-        if (rebuildTimeoutRef.current) clearTimeout(rebuildTimeoutRef.current)
-        rebuildTimeoutRef.current = setTimeout(() => {
-          rebuildTimeoutRef.current = null
-          rebuildFor(target)
-        }, 150)
-        return
-      }
-
-      rebuildFor(target)
+      const delay = breadcrumbVisible ? 150 : 60
+      if (rebuildTimeoutRef.current) clearTimeout(rebuildTimeoutRef.current)
+      rebuildTimeoutRef.current = setTimeout(() => {
+        rebuildTimeoutRef.current = null
+        rebuildFor(target)
+      }, delay)
     }
 
     const onClick = async (e: MouseEvent) => {
@@ -304,7 +306,7 @@ export function ElementSelector() {
 
     document.addEventListener('mousemove', onMouseMove, { capture: true })
     document.addEventListener('mousedown', suppressDefault, { capture: true })
-    document.addEventListener('touchstart', suppressDefault, { capture: true })
+    document.addEventListener('touchstart', suppressDefault, { capture: true, passive: false })
     document.addEventListener('click', onClick, { capture: true })
 
     return () => {
