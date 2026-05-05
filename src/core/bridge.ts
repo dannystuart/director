@@ -159,7 +159,6 @@ function startSelecting() {
   if (active) return
   active = true
   ensureDOM()
-  console.log('[VA bridge] startSelecting — listeners attached, highlight el=', highlight)
   document.addEventListener('mousemove', onMouseMove, { capture: true })
   document.addEventListener('mousedown', suppressDefault, { capture: true })
   document.addEventListener('touchstart', suppressDefault, { capture: true, passive: false })
@@ -183,8 +182,6 @@ function onMessage(e: MessageEvent) {
   const data = e.data
   if (!data || typeof data.type !== 'string') return
 
-  console.log('[VA bridge] received message:', data.type)
-
   switch (data.type) {
     case 'va:start-selecting':
       visionMode = !!data.visionMode
@@ -197,6 +194,5 @@ function onMessage(e: MessageEvent) {
 }
 
 export function mountBridge() {
-  console.log('[VA bridge] mountBridge called in iframe, location=', window.location.href)
   window.addEventListener('message', onMessage)
 }

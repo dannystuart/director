@@ -154,8 +154,6 @@ export function ElementSelector() {
 
     const iframe = state.viewport.iframe
 
-    console.log('[VA] parent posting va:start-selecting to iframe')
-
     // Tell the bridge to start selecting
     iframe.contentWindow?.postMessage(
       { type: 'va:start-selecting', visionMode: state.visionMode },
